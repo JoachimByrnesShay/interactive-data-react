@@ -79,9 +79,15 @@ function App() {
 
   // APP METHODS ARE BELOW
   // many INITIAL TWEAKS AND TODOS pending to include:
-  // 1.  if filter doesn't yeield any results, 
+  // 1.  if filter doesn't yield any results, 
   // up or down arrow should provide same functionality as clicking in filter field as if to edit, but currently does not
   // 2. up arrow back into filter field results in 2 positions-  first at end of string, second at start of string on an additionao 'up'-  probably normalize this so only one possibliity    
+  // 3. start changing the state of the data upon user UI control appropriately 
+  // 4. visual design and color
+  // 5. charts 
+  // 6. 2nd select and filter set for currency conversions TO 
+  // 7.  etc 
+
 
   function handleSelectSpecialKeyPresses(e) {
     // if up arrow pressed and at first index of list already, restore focus to filter field
