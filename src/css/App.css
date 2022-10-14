@@ -1,0 +1,78 @@
+{
+    box-sizing: border-box;
+  }
+  
+  body {
+    margin: 0;
+  }
+  
+  :root {
+    --Page-backgroundColor: #cddeee;
+    --Header-backgroundColor: #38598b;
+    --Footer-backgroundColor: rgb(51, 66, 87);
+    --ChartContent-linearGradientBackground: linear-gradient(to bottom, #ebf1f6 0%,#abd3ee 50%,#2ec3eb 51%,#d5ebfb 100%);
+    --Configure-linearGradientBackground: linear-gradient(to left, #ebf1f6 0%,#abd3ee 20%,#2ec3eb 71%,#d5ebfb 100%);
+    --Footer-backgroundColor: rgb(51, 66, 87);
+    --ChartContent-borderColor: black;
+  }
+  
+  .Page {
+    width: 100vw;
+    height: 100vh;
+    padding: 0 10vw 0 10vw;
+    background: var(--Page-backgroundColor);
+    display: grid;
+    grid-template-columns: 1fr;
+    grid-template-rows: 3fr 5fr 40fr 1fr;
+    background:blue;
+  }
+  
+  .Header {
+    background: var(--Header-backgroundColor);
+  }
+  
+  .Configure {
+    background: var(--Configure-linearGradientBackground);
+    display: grid;
+    grid-template-columns: repeat(auto-fill,minmax(20em,1fr));
+  }
+
+  .Configure-baseForm, .COnfigure-comparisonsForm {
+
+  }
+
+  .Configure-baseFilter {
+    max-width:4em;
+  }
+
+  .Configure-baseSelectBox {
+    width:20em;
+  
+    background:red;
+    overflow-y:block;
+    /* margin-top: .8em;
+    border: 2px solid black;
+    border-radius: 5px;
+    overflow-y: scroll;
+    scroll-behavior: smooth;
+    width: 20em;
+    width: 90%;
+    justify-self: center;
+    list-style-type: none;
+    background-color: var(--Configure-selectBoxes-backgroundColor);
+    background-image: var(--Configure-selectBoxes-linearGradientBackground);
+    color: black;
+    text-shadow: 1px 1px 1px grey; */
+  }
+  
+  .ChartContent {
+    background: var(--ChartContent-linearGradientBackground);
+    border: .5em solid var(--ChartContent-borderColor);
+    border-radius: .5em;
+  }
+  
+  .Footer {
+    background: var(--Footer-backgroundColor);
+    color: white;
+  }
+  
