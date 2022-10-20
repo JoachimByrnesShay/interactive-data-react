@@ -29,8 +29,16 @@
   
   .Header {
     background: var(--Header-backgroundColor);
+    display:flex;
   }
-  
+  .Header > div {
+    margin-left: 15em;
+  }
+  .Header > div > p {
+    display: inline;
+    margin-left: 1em;
+    background:beige;
+  }
   .Configure {
     background: var(--Configure-linearGradientBackground);
     display: grid;

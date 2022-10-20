@@ -13,7 +13,7 @@ function App() {
   // programmatic management necessary due to the implemented feature-set
   const baseFilterRef = useRef(null);
   const baseSelectRef = useRef(null);
-
+  const convertSelectRef = useRef(null);
 
   const [currencyData, setcurrencyData] = useState({
     convertFrom: 'USD',
@@ -30,6 +30,7 @@ function App() {
   // a boolean always, should base select be in focus, check if this is needed
   const [baseSelectInFocus, setBaseSelectInFocus] = useState(false);
 
+  const [convertSelectInFocus, setConvertSelectInFocus] = useState(false);
   // a boolean, currently a dependancy of a useEffect call which swaps focus into filter and from select if true, check if needed as useEffect, check
   // functionality doesn't break when additional filters and selects are added
   const [goToBaseFilter, setGoToBaseFilter] = useState(false);
@@ -40,6 +41,7 @@ function App() {
   useEffect(()=>baseSelectInFocus ? (()=>{baseSelectRef.current.focus();baseSelectRef.current.selectedIndex = 0})() : undefined, [baseSelectInFocus]);
   useEffect(()=>goToBaseFilter ? (()=>{baseFilterRef.current.focus();baseSelectRef.current.blur();baseSelectRef.current.selectedIndex = -1;setGoToBaseFilter(false);setBaseSelectInFocus(false)} )() : undefined,[goToBaseFilter])
   
+  useEffect(()=>convertSelectInFocus ? (()=>{convertSelectRef.current.focus();convertSelectRef.current.selectedIndex=0})() : undefined, [convertSelectInFocus]);
 
   // APP METHODS are temporarily defined below the return block for development purposes
 
@@ -48,11 +50,14 @@ function App() {
     <div className="Page" onKeyDown={(e)=>e.keyCode === 13 ? e.preventDefault() : undefined}>
       <header className="Header">
          <p>{currencyData.convertFrom}</p>
+         <div>
+          {currencyData.convertTo.map(o=><p>{o}</p>)}
+         </div>
       </header>
       <div className="Configure">
         <div className="Configure-Base-Left">
           <form>
-          <input ref={baseFilterRef} onKeyUp={handleFilterDownArrow} placeholder="filter currency" onClick={handleBaseFilterClick} onChange={handleBaseFilterChange} value={baseFilterVal}/>
+          <input ref={baseFilterRef} onKeyUp={handleFilterDownArrow_Base} placeholder="filter currency" onClick={handleBaseFilterClick} onChange={handleBaseFilterChange} value={baseFilterVal}/>
           </form>
           {
               <select size="5" ref={baseSelectRef} onKeyUp={handleSelectSpecialKeyPresses} onChange={handleBaseSelectChange} className="Configure-baseSelectBox">
@@ -65,9 +70,9 @@ function App() {
         </div>
         <div className="Configure-Convert-Right">
         <form>
-        <input/>
+        <input value={convertFilterVal} placeholder="filter currency" onChange={handleConvertFilterChange} onKeyUp={handleFilterDownArrow_Convert} />
         </form>
-          <select className="Configure-convertSelectBox" size="5">
+          <select ref={convertSelectRef} className="Configure-convertToSelectBox" onChange={handleConvertSelectChange} size="5">
           {
             // this filter should include the same terms as base filter with addition of omitting the selected currency?
             Object.keys(currencyData.fullNames).filter(o=>convertToFilteredVal(o)).map((o,i)=>convertCreateOption(o,i))
@@ -107,7 +112,7 @@ function convertToFilteredVal(o) {
 }
 
   function convertCreateOption(o,i) {
-    return <option value={o}>{o}: {currencyData.fullNames[o]}</option>
+    return <option onClick={e=>console.log('convert option has been clicked')} value={o}>{o}: {currencyData.fullNames[o]}</option>
   }
 
 
@@ -125,13 +130,21 @@ function convertToFilteredVal(o) {
       setcurrencyData(argu);
     }
   }
-  function handleFilterDownArrow(e){
+  function handleFilterDownArrow_Base(e){
     // if down arrow pressed while in filter field, set focus to select box below it
     // part II of providing the user an up/down scrollable unit consisting of both filter field and select options list combined
     if (e.keyCode === 40) {
       console.log("key DOWN ARROW");
       setBaseSelectInFocus(true);
     }
+  }
+
+  function handleFilterDownArrow_Convert(e) {
+    if (e.keyCode === 40) {
+      console.log("key DOwn arrow in CONVERT filter");
+      setConvertSelectInFocus(true);
+    }
+
   }
   
   function handleBaseFilterClick(e) {
@@ -172,6 +185,11 @@ function convertToFilteredVal(o) {
     setBaseFilterVal(val);
   }
   
+  function handleConvertFilterChange(thisFilter) {
+    let val = thisFilter.target.value;
+    setConvertFilterVal(val);
+  }
+
   function handleOptionClick(optionVal,e) {
    // console.log(e.target.textContent);
     // if double-left click on an option, we want to use selection of this option to set a new convertFrom value (i.e. e.detail val is the consecutive num of left clicks)
@@ -186,6 +204,11 @@ function convertToFilteredVal(o) {
   function handleBaseSelectChange(thisSelect){
     let val = thisSelect.target.value;
     console.log("select value is now changed to this: ", val);
+  }
+
+  function handleConvertSelectChange(thisSelect) {
+    let val = thisSelect.target.value;
+    console.log("convertTo select val is now changed to this: ", val);
   }
 }
 
