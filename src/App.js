@@ -1,4 +1,4 @@
-import {useState, useEffect, useRef} from 'react';
+ import {useState, useEffect, useRef} from 'react';
  
 
 const FetchConstants = {
@@ -6,14 +6,7 @@ const FetchConstants = {
   app_id: '0f6288f8f4b4421ba1a18cf74a5b9dcf'
 }
 
-// this should probably be changed to be a state variable,
-// but several design decision possibilities are under consideration
-const currencyData = {
-  convertFrom: 'USD',
-  convertTo: ['EUR', 'GBP', 'CNY', 'BGN', 'AED'],
-  rates: {},
-  fullNames: {},
-}
+
 
 function App() {
   // references are utilized for the purpose of managing focus of filters (text input) and the related select boxes only
@@ -21,9 +14,14 @@ function App() {
   const baseFilterRef = useRef(null);
   const baseSelectRef = useRef(null);
 
-  // merge with currencyData
-  const [currencyNames, setCurrencyNames] = useState([]);
-  const [convertFrom, setConvertFrom] = useState('USD');
+
+  const [currencyData, setcurrencyData] = useState({
+    convertFrom: 'USD',
+    convertTo: ['EUR', 'GBP', 'CNY', 'BGN', 'AED'],
+    rates: {},
+    fullNames: {},
+  });
+
 
   // employed in input field which is utilized as a filter for base currency
   const [baseFilterVal, setBaseFilterVal] = useState("");
@@ -35,9 +33,7 @@ function App() {
   // functionality doesn't break when additional filters and selects are added
   const [goToBaseFilter, setGoToBaseFilter] = useState(false);
  
-  
-  useEffect(fetchNames, []);
-  useEffect(fetchRates, [], console.log('test fetch rates: ', currencyData));
+  useEffect(fetchAll, []);
 
   // clean this up, define functions for these, comb and weed unnecessary code
   useEffect(()=>baseSelectInFocus ? (()=>{baseSelectRef.current.focus();baseSelectRef.current.selectedIndex = 0})() : undefined, [baseSelectInFocus]);
@@ -50,7 +46,7 @@ function App() {
     // prevent default behavior of refresh of browser page when enter key is pressed in any/all input field
     <div className="Page" onKeyDown={(e)=>e.keyCode === 13 ? e.preventDefault() : undefined}>
       <header className="Header">
-        <p>{convertFrom}</p>
+         <p>{currencyData.convertFrom}</p>
       </header>
       <div className="Configure">
         <div className="Configure-Base-Left">
@@ -61,7 +57,7 @@ function App() {
               <select size="5" ref={baseSelectRef} onKeyUp={handleSelectSpecialKeyPresses} onChange={handleBaseSelectChange} className="Configure-baseSelectBox">
                
                 {// define named function for below filtering/mapping, rename variables
-                currencyNames.filter(o=>o.toLowerCase().startsWith(baseFilterVal.toLowerCase()) ).map((o,i)=><option value={o} onClick={(e)=>handleOptionClick(o,e)}>{o}: {currencyData.fullNames[o]}</option>)
+                Object.keys(currencyData.fullNames).filter(o=>baseFilteredVal(o) ).map((o,i)=>baseCreateOption(o,i))
                 }
                 </select>
           }    
@@ -88,6 +84,13 @@ function App() {
   // 6. 2nd select and filter set for currency conversions TO 
   // 7.  etc 
 
+  function baseFilteredVal(o) {
+    return o.toLowerCase().startsWith(baseFilterVal.toLowerCase());
+  }
+
+  function baseCreateOption(o,i) {
+    return <option value={o} onClick={(e)=>handleOptionClick(o,e)}>{o}: {currencyData.fullNames[o]}</option>
+  }
 
   function handleSelectSpecialKeyPresses(e) {
     // if up arrow pressed and at first index of list already, restore focus to filter field
@@ -97,7 +100,10 @@ function App() {
       setGoToBaseFilter(true);
     } else if (e.key === 'Enter') {
       // when the enter key is pressed on an option, set the "currency to convert from" to the selected option  
-      setConvertFrom(baseSelectRef.current.options[baseSelectRef.current.selectedIndex].value);
+      let val = baseSelectRef.current.options[baseSelectRef.current.selectedIndex].value;
+      //setConvertFrom(baseSelectRef.current.options[baseSelectRef.current.selectedIndex].value);
+      let argu = {...currencyData, convertFrom: val};
+      setcurrencyData(argu);
     }
   }
   function handleFilterDownArrow(e){
@@ -118,19 +124,28 @@ function App() {
     setGoToBaseFilter(true);
   }
 
-  function fetchRates() {
+
+    function fetchAll() {
     let baseRates = `latest.json?app_id=${FetchConstants.app_id}&base='${currencyData.convertFrom}'`;
-    fetch(FetchConstants.baseURL + baseRates).then(response => response.json())
-      .then(data => currencyData.rates = data.rates)
-  
+      let baseSubURLfullNames = 'currencies.json';
+      let ratesURL = FetchConstants.baseURL + baseRates;
+      let namesURL = FetchConstants.baseURL + baseSubURLfullNames;
+      fetch(namesURL).then(response => response.json())
+        .then(namesData => {
+          let arg = {...currencyData, fullNames: namesData};
+          setcurrencyData(arg)
+        return namesData;
+      }).then((namesData) => {
+        //console.log('this is data from fetchAll: ', namesData);
+        fetch(ratesURL).then(response => response.json())
+          .then(ratesResults => {
+            //console.log('this is ratesData', ratesData);
+            let arg = {...currencyData, rates: ratesResults.rates, fullNames: namesData};
+            setcurrencyData(arg);
+          })
+      });
   }
-  
-  function fetchNames() {
-    let baseSubURLfullNames = 'currencies.json';
-    fetch(FetchConstants.baseURL + baseSubURLfullNames).then(response => response.json())
-      .then(data => currencyData.fullNames = data)
-      .then(() => setCurrencyNames(Object.keys(currencyData.fullNames)));
-  }
+
   
   function handleBaseFilterChange(thisFilter) {
     // the filter field input, used as new value in JSX upon changes
@@ -139,11 +154,12 @@ function App() {
   }
   
   function handleOptionClick(optionVal,e) {
-    console.log(e.target.textContent);
+   // console.log(e.target.textContent);
     // if double-left click on an option, we want to use selection of this option to set a new convertFrom value (i.e. e.detail val is the consecutive num of left clicks)
     // design decision--- on double click, but NOT on single click, which potentially may be employed by user as part of the navigation process without other intentions
     if (e.detail === 2){
-      setConvertFrom(optionVal);
+      let arg = {...currencyData, convertFrom: optionVal};
+      setcurrencyData(arg)
     }
   }
   

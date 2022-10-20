@@ -45,7 +45,11 @@
     max-width:4em;
   }
 
-  .Configure-baseSelectBox {
+  .selectedComparison {
+    background: blue;
+  }
+
+  .Configure-baseSelectBox, .Configure-convertToSelectBox {
     width:20em;
   
     background:red;
