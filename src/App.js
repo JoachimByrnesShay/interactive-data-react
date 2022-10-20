@@ -26,6 +26,7 @@ function App() {
   // employed in input field which is utilized as a filter for base currency
   const [baseFilterVal, setBaseFilterVal] = useState("");
 
+   const [convertFilterVal, setConvertFilterVal] = useState("");
   // a boolean always, should base select be in focus, check if this is needed
   const [baseSelectInFocus, setBaseSelectInFocus] = useState(false);
 
@@ -62,8 +63,15 @@ function App() {
                 </select>
           }    
         </div>
-        <div className="Configure-To-Right">
-          <select className="To">
+        <div className="Configure-Convert-Right">
+        <form>
+        <input/>
+        </form>
+          <select className="Configure-convertSelectBox" size="5">
+          {
+            // this filter should include the same terms as base filter with addition of omitting the selected currency?
+            Object.keys(currencyData.fullNames).filter(o=>convertToFilteredVal(o)).map((o,i)=>convertCreateOption(o,i))
+          }
           </select>
         </div>
       </div>
@@ -91,6 +99,17 @@ function App() {
   function baseCreateOption(o,i) {
     return <option value={o} onClick={(e)=>handleOptionClick(o,e)}>{o}: {currencyData.fullNames[o]}</option>
   }
+
+
+function convertToFilteredVal(o) {
+   let val = o.toLowerCase().startsWith(convertFilterVal.toLowerCase());
+   return val && (o.toLowerCase() !== currencyData.convertFrom.toLowerCase());
+}
+
+  function convertCreateOption(o,i) {
+    return <option value={o}>{o}: {currencyData.fullNames[o]}</option>
+  }
+
 
   function handleSelectSpecialKeyPresses(e) {
     // if up arrow pressed and at first index of list already, restore focus to filter field
