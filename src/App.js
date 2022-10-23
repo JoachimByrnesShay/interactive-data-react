@@ -39,6 +39,8 @@
      const [goToConvertFilter, setGoToConvertFilter] = useState(false);
 
      useEffect(fetchAll, []);
+     useEffect(showIndices, [prevBaseSelectIx]);
+     
 
      // clean this up, define functions for these, comb and weed unnecessary code
      useEffect(() => baseSelectInFocus ? (() => {
@@ -46,7 +48,7 @@
          //convertSelectRef.current.blur();
          baseSelectRef.current.selectedIndex = 0;
          // this is excessive
-        // convertSelectRef.current.selectedIndex = -1;
+        //convertSelectRef.current.selectedIndex = -1;
      })() : undefined, [baseSelectInFocus]);
 
       useEffect(() => convertSelectInFocus ? (() => {
@@ -75,13 +77,18 @@
           convertSelectRef.current.blur();
           //do I need this
           convertSelectRef.current.selectedIndex = -1;
-          setPrevConvertSelectIx(-1);
+          //setPrevConvertSelectIx(-1);
           setGoToConvertFilter(false);
           setConvertSelectInFocus(false);
           //setBaseSelectInFocus(false);
       })() : undefined, [goToConvertFilter]);
+
+
+ 
      // APP METHODS are temporarily defined below the return block for development purposes
      return (
+    
+     
          // prevent default behavior of refresh of browser page when enter key is pressed in any/all input field
          <div className="Page" onKeyDown={(e)=>e.keyCode === 13 ? e.preventDefault() : undefined}>
     <header className="Header">
@@ -129,6 +136,12 @@
      // 5. charts
      // 6. 2nd select and filter set for currency conversions TO
      // 7. etc
+
+     function showIndices() {
+
+        console.log("base ix = : ", baseSelectRef.current.selectedIndex);
+        console.log("convert ix = : ", convertSelectRef.current.selectedIndex);
+     }
      function baseFilteredVal(o) {
          return o.toLowerCase().startsWith(baseFilterVal.toLowerCase());
      }
@@ -150,8 +163,10 @@
          // if up arrow pressed and at first index of list already, restore focus to filter field
          // this allows a smooth user experience of if using up arrow to scroll upward through select list,
          // user "pops" into filter field after scrolling up past option 0
+         e.preventDefault();
          let currentIndex = e.target.selectedIndex;
          if (e.keyCode === 38) {
+          console.log('yes its 38');
              (prevBaseSelectIx === 0) ? setGoToBaseFilter(true): setPrevBaseSelectIx(currentIndex);
 
          } else if (e.key === 'Enter') {
@@ -165,12 +180,29 @@
 
      function handleSelectSpecialKeyPresses_Convert(e) {
          let currentIndex = e.target.selectedIndex;
+         let val = e.target.value;
          if (e.keyCode == 38) {
           (prevConvertSelectIx === 0) ? setGoToConvertFilter(true) : setPrevConvertSelectIx(currentIndex);
              
          } else if (e.key === 'Enter') {
+          let newArr;
              let val = convertSelectRef.current.options[convertSelectRef.current.selectedIndex].value;
-             console.log('on enter, the convertTo list should change, under specific conditions');
+             if(currencyData.convertTo.includes(val)) {
+              console.log('val is : ', val);
+             console.log('on enter, this should be removed');
+             let ix = currencyData.convertTo.indexOf(val);
+             console.log(ix);
+             let endIx = currencyData.convertTo.length - 1;
+
+             newArr = (currencyData.convertTo.slice(0,ix)).concat(currencyData.convertTo.slice(ix+1,endIx+1));
+          
+           } else {
+      
+            newArr = currencyData.convertTo.concat([val]);
+    
+           }
+
+           setcurrencyData({...currencyData, convertTo: newArr})
          }
      }
 
@@ -179,16 +211,21 @@
      function handleFilterDownArrow_Base(e) {
          // if down arrow pressed while in filter field, set focus to select box below it
          // part II of providing the user an up/down scrollable unit consisting of both filter field and select options list combined
+         let currentIndex = e.target.selectedIndex;
          if (e.keyCode === 40) {
-             console.log("key DOWN ARROW");
-             setBaseSelectInFocus(true);
-             setPrevBaseSelectIx(e.target.selectedIndex);
+             //console.log("key DOWN ARROW");
+             console.log('yes its code 40');
+             if(!baseSelectInFocus) {
+              setBaseSelectInFocus(true);
+             } 
+            setPrevBaseSelectIx(currentIndex);
+            showIndices();
          }
      }
 
      function handleFilterDownArrow_Convert(e) {
          if (e.keyCode === 40) {
-             console.log("key DOwn arrow in CONVERT filter");
+             //console.log("key DOwn arrow in CONVERT filter");
              setConvertSelectInFocus(true);
              setPrevConvertSelectIx(e.target.selectedIndex);
          }
@@ -257,7 +294,7 @@
 
      function handleConvertSelectChange(thisSelect) {
          let val = thisSelect.target.value;
-         console.log("convertTo select val is now changed to this: ", val);
+         //console.log("convertTo select val is now changed to this: ", val);
      }
  }
  export default App;
