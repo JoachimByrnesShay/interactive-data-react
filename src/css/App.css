@@ -60,7 +60,7 @@
     background: blue;
   }
 
-  .Configure-baseSelectBox, .Configure-convertToSelectBox {
+  .Configure-baseSelectBox, .Configure-convertSelectBox {
     width:20em;
   
     background:red;
@@ -92,6 +92,7 @@
     justify-content: space-between;
     align-items: flex-end;
     height:100%;
+    position: relative;
   }
   
   .Footer {
@@ -99,3 +100,19 @@
     color: white;
   }
   
+
+  .Modal {
+    width: 20em;
+    background: lightblue;
+    border:1px solid black;
+  }
+
+  .thisModal {
+    display:none;
+    position: absolute;
+    top:50%;
+  }
+
+  .thisModal.show {
+    display:visible;
+  }

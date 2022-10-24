@@ -1,4 +1,4 @@
- import { useState, useEffect, useRef } from 'react';
+ import { useState, useEffect, useRef, useReducer } from 'react';
 
 
  const FetchConstants = {
@@ -9,56 +9,61 @@
  function App() {
      // references are utilized for the purpose of managing focus of filters (text input) and the related select boxes only
      // programmatic management necessary due to the implemented feature-set
-     const refs = {
-         baseFilterRef: useRef(null),
-         baseSelectRef: useRef(null),
-         convertFilterRef: useRef(null),
-         convertSelectRef: useRef(null),
-     }
+     const baseFilterRef = useRef(null);
+     const baseSelectRef = useRef(null);
+     const convertFilterRef = useRef(null);
+     const convertSelectRef = useRef(null);
 
      const [baseFilterVal, setBaseFilterVal] = useState("");
      const [convertFilterVal, setConvertFilterVal] = useState("");
      const [showThisModal, setShowThisModal] = useState(false);
+     // const initialState = {
+     //    baseFilterVal: "",
+     //    convertFilterVal: "",
+     //    showThisModal: false,
 
-     const elemAttribs = {
-         baseFilter: {
-             onKeyUp: handleFilterDownArrow_Base,
-             placeholder: "filter",
-             onClick: handleBaseFilterClick,
-             onChange: handleBaseFilterChange,
-             value: baseFilterVal,
-         },
-         convertFilter: {
-             onKeyUp: handleFilterDownArrow_Convert,
-             placeholder: "another filter",
-             onClick: handleConvertFilterClick,
-             onChange: handleConvertFilterChange,
-             value: convertFilterVal,
-         },
-         baseSelect: {
-             size: "5",
-             onKeyUp: handleSelectSpecialKeyPresses_Base,
-             onChange: handleBaseSelectChange,
-             className: "Configure-baseSelectBox"
-         },
-         convertSelect: {
-             size: "5",
-             onKeyUp: handleSelectSpecialKeyPresses_Convert,
-             onChange: handleConvertSelectChange,
-             className: "Configure-convertSelectBox"
-         }
-     }
+     // }
+     // const [state, dispatch] = useReducer(reducer, initalState);
 
-
-     const BaseFilter = () => <input ref={refs.baseFilterRef} {...elemAttribs.baseFilter}/>
-     const ConvertFilter = () => <input ref={refs.convertFilterRef} {...elemAttribs.convertFilter}/>
-     const BaseSelect = () => {
-         let thing = Object.keys(currencyData.fullNames).filter(o => baseFilteredVal(o)).map((o, i) => baseCreateOption(o, i));
-         return <select ref={refs.baseSelectRef} {...elemAttribs.baseSelect}>{thing}</select>
-     }
+     const BaseFilter = () => <input ref={baseFilterRef} {...baseFilterAttribs}/>
+     const ConvertFilter = () => <input ref={convertFilterRef} {...convertFilterAttribs}/>
+     const BaseSelect = ()=> {
+        let thing = Object.keys(currencyData.fullNames).filter(o=>baseFilteredVal(o) ).map((o,i)=>baseCreateOption(o,i));
+        return <select ref={baseSelectRef} {...baseSelectAttribs}>{thing}</select>
+    }
      const ConvertSelect = () => {
-         let options = Object.keys(currencyData.fullNames).filter(o => convertToFilteredVal(o)).map((o, i) => convertCreateOption(o, i));
-         return <select ref={refs.convertSelectRef} {...elemAttribs.convertSelect}>{options}</select>
+        let options = Object.keys(currencyData.fullNames).filter(o=>convertToFilteredVal(o)).map((o,i)=>convertCreateOption(o,i));
+        return <select ref={convertSelectRef} {...convertSelectAttribs}>{options}</select>
+     }
+
+     const baseFilterAttribs = {
+         onKeyUp: handleFilterDownArrow_Base,
+         placeholder: "filter",
+         onClick: handleBaseFilterClick,
+         onChange: handleBaseFilterChange,
+         value: baseFilterVal,
+     }
+
+     const convertFilterAttribs = {
+         onKeyUp: handleFilterDownArrow_Convert,
+         placeholder: "another filter",
+         onClick: handleConvertFilterClick,
+         onChange: handleConvertFilterChange,
+         value: convertFilterVal,
+     }
+
+     const baseSelectAttribs = {
+         size: "5",
+         onKeyUp: handleSelectSpecialKeyPresses_Base,
+         onChange: handleBaseSelectChange,
+         className: "Configure-baseSelectBox"
+     }
+
+     const convertSelectAttribs = {
+        size: "5",
+        onKeyUp: handleSelectSpecialKeyPresses_Convert,
+        onChange: handleConvertSelectChange,
+        className: "Configure-convertSelectBox"
      }
 
 
@@ -70,65 +75,81 @@
      });
 
      const [focusInSelect, setFocusInSelect] = useState({
-         base: false,
-         convert: false,
+        base: false,
+        convert: false,
      });
-
-     const [goToFilter, setGoToFilter] = useState({
-         base: false,
-         convert: false,
-     });
-
      const [prevBaseSelectIx, setPrevBaseSelectIx] = useState(-1);
      const [prevConvertSelectIx, setPrevConvertSelectIx] = useState(-1);
      // employed in input field which is utilized as a filter for base currency
 
      // a boolean always, should base select be in focus, check if this is needed
-     // const [baseSelectInFocus, setBaseSelectInFocus] = useState(false);
+     const [baseSelectInFocus, setBaseSelectInFocus] = useState(false);
 
-     //const [convertSelectInFocus, setConvertSelectInFocus] = useState(false);
+     const [convertSelectInFocus, setConvertSelectInFocus] = useState(false);
      // a boolean, currently a dependancy of a useEffect call which swaps focus into filter and from select if true, check if needed as useEffect, check
      // functionality doesn't break when additional filters and selects are added
      const [goToBaseFilter, setGoToBaseFilter] = useState(false);
      const [goToConvertFilter, setGoToConvertFilter] = useState(false);
 
-     // note 10/24--- this cannot use currencyData as a dependcy
-     useEffect(fetchAll, []);
+     useEffect(fetchAll, [], makeCharts());
 
      // clean this up, define functions for these, comb and weed unnecessary code
 
-     useEffect(() => {
-         if (focusInSelect.base) {
-             refs.baseSelectRef.current.focus();
-             refs.baseSelectRef.current.selectedIndex = 0;
-         } else if (focusInSelect.convert) {
-             refs.convertSelectRef.current.focus();
-             refs.convertSelectRef.current.selectedIndex = 0;
-         } else { return undefined };
-     }, [focusInSelect]);
+     useEffect((focusInSelect.base || focusInSelect.convert) ? ()=>{
+        if (focusInSelect.base) {
+            baseSelectRef.current.focus();
+            baseSelectRef.current.selectedIndex = 0;
+        } else if (focusInSelect.convert) {
+            convertSelectRef.current.focus();
+            convertSelectRef.current.selectedIndex = 0;
+        }
 
-     useEffect(() => {
-         if (goToFilter.base) {
-             refs.baseFilterRef.current.focus();
-             refs.baseSelectRef.current.blur();
-             refs.baseSelectRef.current.selectedIndex = -1;
-             let arg1 = { ...goToFilter, base: false }
-             setGoToFilter(arg1);
-             let arg2 = { ...focusInSelect, base: false, convert: false };
-             setFocusInSelect(arg2);
-             // })()
-         } else if (goToFilter.convert) {
-             (() => {
-                 refs.convertFilterRef.current.focus();
-                 refs.convertSelectRef.current.blur();
-                 refs.convertSelectRef.current.selectedIndex = -1;
-                 let arg1 = { ...goToFilter, convert: false };
-                 setGoToFilter(arg1);
-                 let arg2 = { ...focusInSelect, base: false, convert: false };
-                 setFocusInSelect(arg2);
-             })()
-         }
-     }, [goToFilter]);
+        } : undefined, [focusInSelect]);
+     
+
+ 
+     // useEffect(() => baseSelectInFocus ? (() => {
+     //     baseSelectRef.current.focus();
+     //     //convertSelectRef.current.blur();
+     //     baseSelectRef.current.selectedIndex = 0;
+     //     // this is excessive
+     //     //convertSelectRef.current.selectedIndex = -1;
+     // })() : undefined, [baseSelectInFocus]);
+
+     // useEffect(() => convertSelectInFocus ? (() => {
+     //     convertSelectRef.current.focus();
+     //     //baseSelectRef.current.blur();
+     //     convertSelectRef.current.selectedIndex = 0;
+     //     // this is excessive
+     //     //baseSelectRef.current.selectedIndex = -1;
+     // })() : undefined, [convertSelectInFocus]);
+
+
+     useEffect(() => goToBaseFilter ? (() => {
+         baseFilterRef.current.focus();
+         baseSelectRef.current.blur();
+         // do I need this 
+         baseSelectRef.current.selectedIndex = -1;
+         setGoToBaseFilter(false);
+         //setSelectSelectInFocus(false);
+         setFocusInSelect(...focusInSelect, {base: false, convert: false});
+         //setConvertSelectInFocus(false);
+     })() : undefined, [goToBaseFilter])
+
+
+
+     useEffect(() => goToConvertFilter ? (() => {
+         convertFilterRef.current.focus();
+         convertSelectRef.current.blur();
+         //do I need this
+         convertSelectRef.current.selectedIndex = -1;
+         //setPrevConvertSelectIx(-1);
+         setGoToConvertFilter(false);
+         //setConvertSelectInFocus(false);
+         setFocusInSelect(...focusInSelect, {base: false, convert: false});
+         //setBaseSelectInFocus(false);
+     })() : undefined, [goToConvertFilter]);
+
 
 
      // APP METHODS are temporarily defined below the return block for development purposes
@@ -189,7 +210,7 @@
      }
 
      function baseCreateOption(o, i) {
-         return <option value={o} key={i} onClick={(e)=>handleOptionClick_base(o,e)}>{o}: {currencyData.fullNames[o]}</option>
+         return <option value={o} key={i} onClick={(e)=>handleOptionClick(o,e)}>{o}: {currencyData.fullNames[o]}</option>
      }
 
      function convertToFilteredVal(o) {
@@ -198,25 +219,23 @@
      }
 
      function convertCreateOption(o, i) {
-         return <option value={o} key={i} onClick={(e)=>handleOptionClick_convert(o,e)}>{o}: {currencyData.fullNames[o]}</option>
+         return <option key={i} onClick={e=>console.log('convert option has been clicked')} value={o}>{o}: {currencyData.fullNames[o]}</option>
      }
 
      function handleSelectSpecialKeyPresses_Base(e) {
          // if up arrow pressed and at first index of list already, restore focus to filter field
          // this allows a smooth user experience of if using up arrow to scroll upward through select list,
          // user "pops" into filter field after scrolling up past option 0
-         //e.preventDefault();
+         e.preventDefault();
          let currentIndex = e.target.selectedIndex;
          if (e.keyCode === 38) {
              console.log('yes its 38');
-             (prevBaseSelectIx === 0) ? setGoToFilter({ ...goToFilter, base: true, convert: false }): setPrevBaseSelectIx(currentIndex);
+             (prevBaseSelectIx === 0) ? setGoToBaseFilter(true): setPrevBaseSelectIx(currentIndex);
 
          } else if (e.key === 'Enter') {
              // when the enter key is pressed on an option, set the "currency to convert from" to the selected option
-             let val = refs.baseSelectRef.current.options[refs.baseSelectRef.current.selectedIndex].value;
+             let val = baseSelectRef.current.options[baseSelectRef.current.selectedIndex].value;
              //setConvertFrom(baseSelectRef.current.options[baseSelectRef.current.selectedIndex].value);
-
-             console.log(currencyData.convertFrom);
              let argu = { ...currencyData, convertFrom: val };
              setcurrencyData(argu);
          }
@@ -226,15 +245,14 @@
          let currentIndex = e.target.selectedIndex;
          let val = e.target.value;
          if (e.keyCode === 38) {
-
-             (prevConvertSelectIx === 0) ? setGoToFilter({ ...goToFilter, convert: true, base: false }): setPrevConvertSelectIx(currentIndex);
+             (prevConvertSelectIx === 0) ? setGoToConvertFilter(true): setPrevConvertSelectIx(currentIndex);
 
          } else if (e.key === 'Enter') {
              let newArr;
-             let val = refs.convertSelectRef.current.options[refs.convertSelectRef.current.selectedIndex].value;
+             let val = convertSelectRef.current.options[convertSelectRef.current.selectedIndex].value;
              if (currencyData.convertTo.includes(val)) {
-                 //console.log('val is : ', val);
-                 //console.log('on enter, this should be removed');
+                 console.log('val is : ', val);
+                 console.log('on enter, this should be removed');
                  let ix = currencyData.convertTo.indexOf(val);
                  console.log(ix);
                  let endIx = currencyData.convertTo.length - 1;
@@ -262,32 +280,18 @@
          if (e.keyCode === 40) {
              //console.log("key DOWN ARROW");
              console.log('yes its code 40');
-             // if (!baseSelectInFocus) {
-             //     setBaseSelectInFocus(true);
-             // }
-             console.log("this is focusInSelect :\n", focusInSelect);
-             //alert(focusInSelect);
              if (!focusInSelect.base) {
-                 //alert('nope');
-                 let arg = { ...focusInSelect, base: true, convert: false };
-                 setFocusInSelect(arg);
-             };
+                 setFocusInSelect(...focusInSelect, {base: true, convert: false});
+             }
              setPrevBaseSelectIx(currentIndex);
          }
      }
 
      function handleFilterDownArrow_Convert(e) {
-         let currentIndex = e.target.selectedIndex;
          if (e.keyCode === 40) {
              //console.log("key DOwn arrow in CONVERT filter");
-             //setConvertSelectInFocus(true);
-             console.log('yes its code 40');
-             console.log(focusInSelect);
-             if (!focusInSelect.convert) {
-                 let arg = { ...focusInSelect, convert: true, base: false };
-                 setFocusInSelect(arg);
-             }
-             setPrevConvertSelectIx(currentIndex);
+             setConvertSelectInFocus(true);
+             setPrevConvertSelectIx(e.target.selectedIndex);
          }
      }
 
@@ -295,18 +299,15 @@
          // if user uses mouse control to travel to and click into the filter field from any distance, instead of using up/down to scroll,
          // reset focus of filter field to "true" and select box to "false" to induce working desired feature set in cooperation with the other tweaks
          // since selectedIndex is manually set in cooperating functions, manually unset with -1 value here
-         refs.baseFilterRef.current.focus();
-         refs.baseSelectRef.current.selectedIndex = -1;
-         refs.convertSelectRef.current.selectedIndex = -1;
-         setGoToFilter({ ...goToFilter, base: true, convert: false });
+         baseFilterRef.current.focus();
+         baseSelectRef.current.selectedIndex = -1;
+         setGoToBaseFilter(true);
      }
 
      function handleConvertFilterClick(e) {
-         refs.convertFilterRef.current.focus();
-         refs.convertSelectRef.current.selectedIndex = -1;
-         refs.baseSelectRef.current.selectedIndex = -1;
-         let arg = { ...goToFilter, convert: true, base: false };
-         setGoToFilter(arg);
+         convertFilterRef.current.focus();
+         convertSelectRef.current.selectedIndex = -1;
+         setGoToConvertFilter(true);
      }
 
      function fetchAll() {
@@ -342,47 +343,13 @@
          setConvertFilterVal(val);
      }
 
-     function handleOptionClick_base(optionVal, e) {
+     function handleOptionClick(optionVal, e) {
          // console.log(e.target.textContent);
          // if double-left click on an option, we want to use selection of this option to set a new convertFrom value (i.e. e.detail val is the consecutive num of left clicks)
          // design decision--- on double click, but NOT on single click, which potentially may be employed by user as part of the navigation process without other intentions
-
-         //cannot currently do the below because it sets the selected index to 0 which is incorrect if clicking into the option directly via mouseover from another element/location on the page.
-         // setFocusInSelect({ ...focusInSelect, base: true })
-         let ix = refs.baseSelectRef.current.selectedIndex;
-         setPrevBaseSelectIx(ix);
-         console.log('clicked on option: ', focusInSelect);
          if (e.detail === 2) {
              //let arg = {...currencyData, convertFrom: optionVal};
              setcurrencyData({ ...currencyData, convertFrom: optionVal })
-         }
-     }
-
-     function handleOptionClick_convert(optionVal, e) {
-         let ix = refs.convertSelectRef.current.selectedIndex;
-         setPrevConvertSelectIx(ix);
-         if (e.detail === 2) {
-             let newArr;
-             let val = optionVal;
-             // let val = refs.convertSelectRef.current.options[refs.convertSelectRef.current.selectedIndex].value;
-             if (currencyData.convertTo.includes(val)) {
-                 //console.log('val is : ', val);
-                 //console.log('on enter, this should be removed');
-                 let ix = currencyData.convertTo.indexOf(val);
-                 console.log(ix);
-                 let endIx = currencyData.convertTo.length - 1;
-                 let leftArr = currencyData.convertTo.slice(0, ix);
-                 let rightArr = currencyData.convertTo.slice(ix + 1, endIx + 1);
-
-                 newArr = [...leftArr, ...rightArr];
-
-             } else {
-
-                 newArr = [...currencyData.convertTo, val]
-
-             }
-
-             setcurrencyData({ ...currencyData, convertTo: newArr })
          }
      }
      // not sure if we need to check onChange on select with the current implementation above, ok without using it so far in Firefox, check Chrome, Edge, etc browsers
@@ -397,38 +364,50 @@
 
      function makeCharts() {
 
+
          let workingArr = [currencyData.convertFrom, ...currencyData.convertTo]
          let max = currencyData.convertFrom;
          workingArr.forEach(e => {
              let thing = parseFloat(currencyData.rates[e]);
-             //console.log(thing);
+             console.log(thing);
              if (parseFloat(currencyData.rates[e]) > parseFloat(currencyData.rates[max])) {
                  max = e;
              }
-         });
 
+         });
          let divs = workingArr.map(e => {
              let height = parseFloat(currencyData.rates[e]) / parseFloat(currencyData.rates[max]) * 100;
+             //return height;
+             let styleAttribs = {
+
+
+
+             };
              let attribs = {
                  onClick: hiModal,
                  style: {
                      background: "green",
                      width: "10%",
                      display: "inline-block",
+
                      height: String(height) + '%',
                  },
              }
-             return (<div {...attribs}>{e}<div className="thisModal" style={showThisModal ? {display: "block", background: "red"} : undefined}>{e}</div></div>)
+             return (<div {...attribs}>{e}<div class="thisModal" style={showThisModal ? {display: "block", background: "red"} : undefined}>{e}</div></div>)
+
          });
 
+
          return divs;
+
      }
 
-     // this is junk,just a prelim note, not designed, not functional
      function hiModal(e) {
          let attribs = {
+
          }
          setShowThisModal(true);
+
      }
  }
  export default App;
