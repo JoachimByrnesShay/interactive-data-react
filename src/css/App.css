@@ -1,9 +1,11 @@
-{
-    box-sizing: border-box;
-  }
-  
+ 
   body {
     margin: 0;
+    padding:0;
+  }
+
+  * {
+    box-sizing: border-box;
   }
   
   :root {
@@ -14,6 +16,7 @@
     --Configure-linearGradientBackground: linear-gradient(to left, #ebf1f6 0%,#abd3ee 20%,#2ec3eb 71%,#d5ebfb 100%);
     --Footer-backgroundColor: rgb(51, 66, 87);
     --ChartContent-borderColor: black;
+    
   }
   
   .Page {
@@ -81,6 +84,14 @@
     background: var(--ChartContent-linearGradientBackground);
     border: .5em solid var(--ChartContent-borderColor);
     border-radius: .5em;
+  }
+
+  .ChartContent-chartsContainer {
+    
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-end;
+    height:100%;
   }
   
   .Footer {

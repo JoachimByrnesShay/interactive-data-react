@@ -1,5 +1,5 @@
  import { useState, useEffect, useRef } from 'react';
-
+ 
 
  const FetchConstants = {
      baseURL: 'https://openexchangerates.org/api/',
@@ -16,6 +16,39 @@
      const convertFilterRef = useRef(null);
      const convertSelectRef = useRef(null);
 
+     const [baseFilterVal, setBaseFilterVal] = useState("");
+
+     const [convertFilterVal, setConvertFilterVal] = useState("");
+
+     const baseFilterAttribs = {
+      onKeyUp: handleFilterDownArrow_Base,
+      placeholder: "filter",
+      onClick: handleBaseFilterClick,
+      onChange: handleBaseFilterChange,
+      value: baseFilterVal,
+
+     }
+
+     const convertFilterAttribs = {
+      onKeyUp: handleFilterDownArrow_Convert,
+      placeholder: "another filter",
+      onClick: handleConvertFilterClick,
+      onChange: handleConvertFilterChange,
+      value: convertFilterVal,
+     }
+
+     const BaseFilter = ()=>{
+      return (
+        <input ref={baseFilterRef} {...baseFilterAttribs}/>   
+      )
+     }
+
+     const ConvertFilter = ()=> {
+      return (
+        <input ref={convertFilterRef} {...convertFilterAttribs}/>
+      )
+     }
+
      const [currencyData, setcurrencyData] = useState({
          convertFrom: 'USD',
          convertTo: ['EUR', 'GBP', 'CNY', 'BGN', 'AED'],
@@ -26,9 +59,7 @@
      const [prevBaseSelectIx, setPrevBaseSelectIx] = useState(-1);
      const [prevConvertSelectIx, setPrevConvertSelectIx] = useState(-1);
      // employed in input field which is utilized as a filter for base currency
-     const [baseFilterVal, setBaseFilterVal] = useState("");
-
-     const [convertFilterVal, setConvertFilterVal] = useState("");
+     
      // a boolean always, should base select be in focus, check if this is needed
      const [baseSelectInFocus, setBaseSelectInFocus] = useState(false);
 
@@ -38,7 +69,7 @@
      const [goToBaseFilter, setGoToBaseFilter] = useState(false);
      const [goToConvertFilter, setGoToConvertFilter] = useState(false);
 
-     useEffect(fetchAll, []);
+     useEffect(fetchAll, [], makeCharts());
      useEffect(showIndices, [prevBaseSelectIx]);
      
 
@@ -84,13 +115,13 @@
       })() : undefined, [goToConvertFilter]);
 
 
- 
+    
      // APP METHODS are temporarily defined below the return block for development purposes
      return (
     
      
          // prevent default behavior of refresh of browser page when enter key is pressed in any/all input field
-         <div className="Page" onKeyDown={(e)=>e.keyCode === 13 ? e.preventDefault() : undefined}>
+            <div className="Page" onKeyDown={(e)=>e.keyCode === 13 ? e.preventDefault() : undefined}>
     <header className="Header">
         <p>{currencyData.convertFrom}</p>
         <div>
@@ -99,8 +130,11 @@
     </header>
     <div className="Configure">
         <div className="Configure-Base-Left">
+        <p> change your base currency from <span style={{background:"black",color:"white",fontWeight:"bold"}}>{currencyData.convertFrom}</span> </p>
             <form>
-                <input ref={baseFilterRef} onKeyUp={handleFilterDownArrow_Base} placeholder="filter currency" onClick={handleBaseFilterClick} onChange={handleBaseFilterChange} value={baseFilterVal} />
+            <label>FILTER
+                {BaseFilter()}
+            </label>
             </form>
             {
             <select size="5" ref={baseSelectRef} onKeyUp={handleSelectSpecialKeyPresses_Base} onChange={handleBaseSelectChange} className="Configure-baseSelectBox">
@@ -111,8 +145,12 @@
             }
         </div>
         <div className="Configure-Convert-Right">
+        <p> select {"<="} 5 currencies to compare </p>
             <form>
-                <input ref={convertFilterRef} value={convertFilterVal} placeholder="filter currency" onChange={handleConvertFilterChange} onClick={handleConvertFilterClick} onKeyUp={handleFilterDownArrow_Convert} />
+            <label>FILTER
+                {ConvertFilter()}
+                
+              </label>
             </form>
             <select ref={convertSelectRef} onKeyUp={handleSelectSpecialKeyPresses_Convert} className="Configure-convertToSelectBox" onChange={handleConvertSelectChange} size="5">
                 {
@@ -120,9 +158,14 @@
                 Object.keys(currencyData.fullNames).filter(o=>convertToFilteredVal(o)).map((o,i)=>convertCreateOption(o,i))
                 }
             </select>
+
         </div>
     </div>
-    <main className="ChartContent"></main>
+    <main className="ChartContent">
+    <div className="ChartContent-chartsContainer">
+    {makeCharts()}
+    </div>
+    </main>
     <footer className="Footer">&copy; 2022 Joachim Byrnes-Shay</footer>
 </div>
      )
@@ -136,6 +179,8 @@
      // 5. charts
      // 6. 2nd select and filter set for currency conversions TO
      // 7. etc
+
+
 
      function showIndices() {
 
@@ -181,7 +226,7 @@
      function handleSelectSpecialKeyPresses_Convert(e) {
          let currentIndex = e.target.selectedIndex;
          let val = e.target.value;
-         if (e.keyCode == 38) {
+         if (e.keyCode === 38) {
           (prevConvertSelectIx === 0) ? setGoToConvertFilter(true) : setPrevConvertSelectIx(currentIndex);
              
          } else if (e.key === 'Enter') {
@@ -193,12 +238,14 @@
              let ix = currencyData.convertTo.indexOf(val);
              console.log(ix);
              let endIx = currencyData.convertTo.length - 1;
-
-             newArr = (currencyData.convertTo.slice(0,ix)).concat(currencyData.convertTo.slice(ix+1,endIx+1));
+             let leftArr = currencyData.convertTo.slice(0,ix);
+             let rightArr = currencyData.convertTo.slice(ix+1, endIx+1);
+ 
+             newArr = [...leftArr, ...rightArr];
           
            } else {
       
-            newArr = currencyData.convertTo.concat([val]);
+            newArr = [...currencyData.convertTo, val]
     
            }
 
@@ -295,6 +342,38 @@
      function handleConvertSelectChange(thisSelect) {
          let val = thisSelect.target.value;
          //console.log("convertTo select val is now changed to this: ", val);
+     }
+
+     function makeCharts() {
+
+     
+        let workingArr = [currencyData.convertFrom,...currencyData.convertTo]
+        let max = currencyData.convertFrom;
+        workingArr.forEach(e=>{
+            let thing = parseFloat(currencyData.rates[e]);
+            console.log(thing);
+            if (parseFloat(currencyData.rates[e]) > parseFloat(currencyData.rates[max])){
+                max = e;
+            }
+   
+        });
+        let divs = workingArr.map(e=>{
+            let height = parseFloat(currencyData.rates[e]) / parseFloat(currencyData.rates[max]) * 100;
+            //return height;
+            let attribs = {
+                background: "green",
+                width: "10%",
+                display: "inline-block",
+               
+
+            };
+            return <div style={{...attribs, "height": String(height) + '%'}}>{e}</div>
+            
+        });
+         
+       
+        return divs;
+
      }
  }
  export default App;
