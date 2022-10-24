@@ -92,7 +92,7 @@
      const [goToBaseFilter, setGoToBaseFilter] = useState(false);
      const [goToConvertFilter, setGoToConvertFilter] = useState(false);
 
-     // note 10/24--- this cannot use currencyData as a dependcy
+     // note 10/24--- as of the current state of the app, this below useEffect call cannot use currencyData as a dependency, it will be called too frequently
      useEffect(fetchAll, []);
 
      // clean this up, define functions for these, comb and weed unnecessary code
@@ -133,8 +133,6 @@
 
      // APP METHODS are temporarily defined below the return block for development purposes
      return (
-
-
          // prevent default behavior of refresh of browser page when enter key is pressed in any/all input field
          <div className="Page" onKeyDown={(e)=>e.keyCode === 13 ? e.preventDefault() : undefined}>
     <header className="Header">
@@ -161,8 +159,6 @@
               </label>
             </form>
             {ConvertSelect()}
-            
-
         </div>
     </div>
     <main className="ChartContent">
@@ -205,7 +201,6 @@
          // if up arrow pressed and at first index of list already, restore focus to filter field
          // this allows a smooth user experience of if using up arrow to scroll upward through select list,
          // user "pops" into filter field after scrolling up past option 0
-         //e.preventDefault();
          let currentIndex = e.target.selectedIndex;
          if (e.keyCode === 38) {
              console.log('yes its 38');
@@ -214,7 +209,6 @@
          } else if (e.key === 'Enter') {
              // when the enter key is pressed on an option, set the "currency to convert from" to the selected option
              let val = refs.baseSelectRef.current.options[refs.baseSelectRef.current.selectedIndex].value;
-             //setConvertFrom(baseSelectRef.current.options[baseSelectRef.current.selectedIndex].value);
 
              console.log(currencyData.convertFrom);
              let argu = { ...currencyData, convertFrom: val };
@@ -233,22 +227,15 @@
              let newArr;
              let val = refs.convertSelectRef.current.options[refs.convertSelectRef.current.selectedIndex].value;
              if (currencyData.convertTo.includes(val)) {
-                 //console.log('val is : ', val);
-                 //console.log('on enter, this should be removed');
                  let ix = currencyData.convertTo.indexOf(val);
                  console.log(ix);
                  let endIx = currencyData.convertTo.length - 1;
                  let leftArr = currencyData.convertTo.slice(0, ix);
                  let rightArr = currencyData.convertTo.slice(ix + 1, endIx + 1);
-
                  newArr = [...leftArr, ...rightArr];
-
              } else {
-
                  newArr = [...currencyData.convertTo, val]
-
              }
-
              setcurrencyData({ ...currencyData, convertTo: newArr })
          }
      }
@@ -260,15 +247,9 @@
          // part II of providing the user an up/down scrollable unit consisting of both filter field and select options list combined
          let currentIndex = e.target.selectedIndex;
          if (e.keyCode === 40) {
-             //console.log("key DOWN ARROW");
              console.log('yes its code 40');
-             // if (!baseSelectInFocus) {
-             //     setBaseSelectInFocus(true);
-             // }
              console.log("this is focusInSelect :\n", focusInSelect);
-             //alert(focusInSelect);
              if (!focusInSelect.base) {
-                 //alert('nope');
                  let arg = { ...focusInSelect, base: true, convert: false };
                  setFocusInSelect(arg);
              };
@@ -279,8 +260,6 @@
      function handleFilterDownArrow_Convert(e) {
          let currentIndex = e.target.selectedIndex;
          if (e.keyCode === 40) {
-             //console.log("key DOwn arrow in CONVERT filter");
-             //setConvertSelectInFocus(true);
              console.log('yes its code 40');
              console.log(focusInSelect);
              if (!focusInSelect.convert) {
@@ -315,17 +294,9 @@
          let ratesURL = FetchConstants.baseURL + baseRates;
          let namesURL = FetchConstants.baseURL + baseSubURLfullNames;
          fetch(namesURL).then(response => response.json())
-             // .then(namesData => {
-             //     let arg = { ...currencyData, fullNames: namesData };
-             //     setcurrencyData(arg)
-             //     return namesData;
-             // })
-             .then((namesData) => {
-                 //console.log('this is data from fetchAll: ', namesData);
+            .then((namesData) => {
                  fetch(ratesURL).then(response => response.json())
                      .then(ratesResults => {
-                         //console.log('this is ratesData', ratesData);
-                         //let arg = {...currencyData, rates: ratesResults.rates, fullNames: namesData};
                          setcurrencyData({ ...currencyData, rates: ratesResults.rates, fullNames: namesData });
                      })
              });
@@ -348,12 +319,10 @@
          // design decision--- on double click, but NOT on single click, which potentially may be employed by user as part of the navigation process without other intentions
 
          //cannot currently do the below because it sets the selected index to 0 which is incorrect if clicking into the option directly via mouseover from another element/location on the page.
-         // setFocusInSelect({ ...focusInSelect, base: true })
          let ix = refs.baseSelectRef.current.selectedIndex;
          setPrevBaseSelectIx(ix);
          console.log('clicked on option: ', focusInSelect);
          if (e.detail === 2) {
-             //let arg = {...currencyData, convertFrom: optionVal};
              setcurrencyData({ ...currencyData, convertFrom: optionVal })
          }
      }
@@ -364,24 +333,16 @@
          if (e.detail === 2) {
              let newArr;
              let val = optionVal;
-             // let val = refs.convertSelectRef.current.options[refs.convertSelectRef.current.selectedIndex].value;
              if (currencyData.convertTo.includes(val)) {
-                 //console.log('val is : ', val);
-                 //console.log('on enter, this should be removed');
                  let ix = currencyData.convertTo.indexOf(val);
                  console.log(ix);
                  let endIx = currencyData.convertTo.length - 1;
                  let leftArr = currencyData.convertTo.slice(0, ix);
                  let rightArr = currencyData.convertTo.slice(ix + 1, endIx + 1);
-
                  newArr = [...leftArr, ...rightArr];
-
              } else {
-
                  newArr = [...currencyData.convertTo, val]
-
              }
-
              setcurrencyData({ ...currencyData, convertTo: newArr })
          }
      }
@@ -392,7 +353,6 @@
 
      function handleConvertSelectChange(thisSelect) {
          let val = thisSelect.target.value;
-         //console.log("convertTo select val is now changed to this: ", val);
      }
 
      function makeCharts() {
@@ -400,8 +360,6 @@
          let workingArr = [currencyData.convertFrom, ...currencyData.convertTo]
          let max = currencyData.convertFrom;
          workingArr.forEach(e => {
-             let thing = parseFloat(currencyData.rates[e]);
-             //console.log(thing);
              if (parseFloat(currencyData.rates[e]) > parseFloat(currencyData.rates[max])) {
                  max = e;
              }
