@@ -40,6 +40,7 @@
         modal5: false, 
      })
 
+
      const [baseFilterVal, setBaseFilterVal] = useState("");
      const [convertFilterVal, setConvertFilterVal] = useState("");
      const elemAttribs = {
@@ -383,15 +384,15 @@
          let divs = workingArr.map((e,ix) => {
              let height = parseFloat(currencyData.rates[e]) / parseFloat(currencyData.rates[max]) * 100;
              let attribs = {
-                 onClick: hiModal,
-                 onMouseOut: showClickedModal[`modal${ix}`] ? byeModal : null,
+                 onClick: ()=>hiModal(ix),
+                 onMouseOut: showClickedModal[`modal${ix}`] ? ()=>byeModal(ix) : null,
                  style: {
                      background: "green",
                      width: "10%",
                      display: "inline-block",
                      height: String(height) + '%',
                  },
-                 "data-modalcontainer": `modal${ix}`,
+                 //"data-modalcontainer": `modal${ix}`,
                  className: showClickedModal[`modal${ix}`] ? `showIt-${ix}` : null,
                  
              }
@@ -401,18 +402,17 @@
          return divs;
      }
 
-     // think through if getAttribute is necessary or appropriate, rename functions
-     function hiModal(e) {  
 
-         console.log(e.target.getAttribute('data-modalcontainer'));
-         let clickedModal = e.target.getAttribute('data-modalcontainer');
-         setShowClickedModal({...showClickedModal, [clickedModal]: !showClickedModal[clickedModal]})
+     function hiModal(ix) {
+        let modalName = `modal${ix}`;
+        setShowClickedModal({...showClickedModal, [modalName]: !showClickedModal[modalName]});
+
      }
 
-     function byeModal(e) {
-        let clickedModal = e.target.getAttribute('data-modalcontainer');
-        console.log('moving off of ', clickedModal);
-        setShowClickedModal({...showClickedModal, [clickedModal]: false})
+     function byeModal(ix) {
+        let modalName = `modal${ix}`;
+        console.log(`moved off of modal${ix}`, " modal name is ", modalName);
+        setShowClickedModal({...showClickedModal, [modalName]: false});
      }
  }
  export default App;
