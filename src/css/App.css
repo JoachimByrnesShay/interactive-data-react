@@ -17,6 +17,7 @@
     --Footer-backgroundColor: rgb(51, 66, 87);
     --ChartContent-borderColor: black;
     
+    
   }
   
   .Page {
@@ -116,3 +117,37 @@
   .thisModal.show {
     display:visible;
   }
+
+  .showIt-0 .thisModal {
+  display: block;
+  background:red;
+  }
+
+  .showIt-1 .thisModal {
+display: block;
+  background:red;
+
+  }
+
+    .showIt-2 .thisModal {
+display: block;
+  background:red;
+  }
+
+  .showIt-3 .thisModal {
+
+display: block;
+  background:red;
+  }
+
+    .showIt-4 .thisModal {
+display: block;
+  background:red;
+  }
+
+  .showIt-5 .thisModal {
+display: block;
+  background:red;
+
+  }
+

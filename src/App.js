@@ -1,5 +1,13 @@
  import { useState, useEffect, useRef } from 'react';
 
+// ! THINGS TO DO 
+// ! evaluate need to split up currencyData state object into smaller state objects,
+//  ! and see if this impacts Fetch in useEffect
+// ! reevaluate my need for keeping track of indices for focus control re select boxes vs filter field
+// ! reevaluate the need for gotofilter and focusinselect and their implementation
+// ! reevaluate the usage of useEffect and implementation
+// ! reevaluate how many times I am calling setCurrecyData and where
+// ! rename functions and variables appropriately, evaluate 
 
  const FetchConstants = {
      baseURL: 'https://openexchangerates.org/api/',
@@ -16,10 +24,24 @@
          convertSelectRef: useRef(null),
      }
 
+     // starter implementation in search of use state to modulate modal show or hide
+     // another way to do this would be use array and identify modals by indices.
+     // i.e. modal0 is modal at index 0 and start with an empty array, populate it as we go, 
+     // think it through some more but
+     // next steps include converting this state variable to such an implementation
+     // issues to consider is that index of a particular chart would then change on re-renders if 
+     // user removes a convertTo currency
+     const [showClickedModal, setShowClickedModal] = useState({
+        modal0: false,
+        modal1: false,
+        modal2: false,
+        modal3: false,
+        modal4: false,
+        modal5: false, 
+     })
+
      const [baseFilterVal, setBaseFilterVal] = useState("");
      const [convertFilterVal, setConvertFilterVal] = useState("");
-     const [showThisModal, setShowThisModal] = useState(false);
-
      const elemAttribs = {
          baseFilter: {
              onKeyUp: handleFilterDownArrow_Base,
@@ -61,7 +83,7 @@
          return <select ref={refs.convertSelectRef} {...elemAttribs.convertSelect}>{options}</select>
      }
 
-
+    // this might be less hassle if I break this into 3 or 4 different state variables, or at least 2.
      const [currencyData, setcurrencyData] = useState({
          convertFrom: 'USD',
          convertTo: ['EUR', 'GBP', 'CNY', 'BGN', 'AED'],
@@ -81,14 +103,7 @@
 
      const [prevBaseSelectIx, setPrevBaseSelectIx] = useState(-1);
      const [prevConvertSelectIx, setPrevConvertSelectIx] = useState(-1);
-     // employed in input field which is utilized as a filter for base currency
-
-     // a boolean always, should base select be in focus, check if this is needed
-     // const [baseSelectInFocus, setBaseSelectInFocus] = useState(false);
-
-     //const [convertSelectInFocus, setConvertSelectInFocus] = useState(false);
-     // a boolean, currently a dependancy of a useEffect call which swaps focus into filter and from select if true, check if needed as useEffect, check
-     // functionality doesn't break when additional filters and selects are added
+     
      const [goToBaseFilter, setGoToBaseFilter] = useState(false);
      const [goToConvertFilter, setGoToConvertFilter] = useState(false);
 
@@ -365,28 +380,39 @@
              }
          });
 
-         let divs = workingArr.map(e => {
+         let divs = workingArr.map((e,ix) => {
              let height = parseFloat(currencyData.rates[e]) / parseFloat(currencyData.rates[max]) * 100;
              let attribs = {
                  onClick: hiModal,
+                 onMouseOut: showClickedModal[`modal${ix}`] ? byeModal : null,
                  style: {
                      background: "green",
                      width: "10%",
                      display: "inline-block",
                      height: String(height) + '%',
                  },
+                 "data-modalcontainer": `modal${ix}`,
+                 className: showClickedModal[`modal${ix}`] ? `showIt-${ix}` : null,
+                 
              }
-             return (<div {...attribs}>{e}<div className="thisModal" style={showThisModal ? {display: "block", background: "red"} : undefined}>{e}</div></div>)
+             return (<div {...attribs}>{e}<div className="thisModal">{e}</div></div>)
          });
 
          return divs;
      }
 
-     // this is junk,just a prelim note, not designed, not functional
-     function hiModal(e) {
-         let attribs = {
-         }
-         setShowThisModal(true);
+     // think through if getAttribute is necessary or appropriate, rename functions
+     function hiModal(e) {  
+
+         console.log(e.target.getAttribute('data-modalcontainer'));
+         let clickedModal = e.target.getAttribute('data-modalcontainer');
+         setShowClickedModal({...showClickedModal, [clickedModal]: !showClickedModal[clickedModal]})
+     }
+
+     function byeModal(e) {
+        let clickedModal = e.target.getAttribute('data-modalcontainer');
+        console.log('moving off of ', clickedModal);
+        setShowClickedModal({...showClickedModal, [clickedModal]: false})
      }
  }
  export default App;
