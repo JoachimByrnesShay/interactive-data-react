@@ -24,21 +24,9 @@
          convertSelectRef: useRef(null),
      }
 
-     // starter implementation in search of use state to modulate modal show or hide
-     // another way to do this would be use array and identify modals by indices.
-     // i.e. modal0 is modal at index 0 and start with an empty array, populate it as we go, 
-     // think it through some more but
-     // next steps include converting this state variable to such an implementation
-     // issues to consider is that index of a particular chart would then change on re-renders if 
-     // user removes a convertTo currency
-     const [showClickedModal, setShowClickedModal] = useState({
-        modal0: false,
-        modal1: false,
-        modal2: false,
-        modal3: false,
-        modal4: false,
-        modal5: false, 
-     })
+
+     // modulate show or hide of modal with boolean value, ternary expression uses this in jsx build of modal attributes, i.e. related functions
+     const [isChartModalDisplayed, setIsChartModalDisplayed] = useState(Array(5).fill(false));
 
 
      const [baseFilterVal, setBaseFilterVal] = useState("");
@@ -151,14 +139,15 @@
      return (
          // prevent default behavior of refresh of browser page when enter key is pressed in any/all input field
          <div className="Page" onKeyDown={(e)=>e.keyCode === 13 ? e.preventDefault() : undefined}>
+    
     <header className="Header">
         <p>{currencyData.convertFrom}</p>
         <div>
-            {currencyData.convertTo.map((o,i)=><p key={i}>{o}</p>)}
+            {currencyData.convertTo.map((o,i)=><p style={{display: "inline"}} onMouseDown={(e)=>console.log(e.target.offsetLeft, ', ',e.target.offsetRight)} key={i}>{o}</p>)}
         </div>
     </header>
     <div className="Configure">
-        <div className="Configure-Base-Left">
+        <div className="Configure-Base">
         <p> change your base currency from <span style={{background:"black",color:"white",fontWeight:"bold"}}>{currencyData.convertFrom}</span> </p>
             <form>
             <label>FILTER
@@ -167,7 +156,7 @@
             </form>
             {BaseSelect()}
         </div>
-        <div className="Configure-Convert-Right">
+        <div className="Configure-Conversion">
         <p> select {"<="} 5 currencies to compare </p>
             <form>
             <label>FILTER
@@ -178,9 +167,9 @@
         </div>
     </div>
     <main className="ChartContent">
-    <div className="ChartContent-chartsContainer">
+     
     {makeCharts()}
-    </div>
+    
     </main>
     <footer className="Footer">&copy; 2022 Joachim Byrnes-Shay</footer>
 </div>
@@ -375,44 +364,52 @@
 
          let workingArr = [currencyData.convertFrom, ...currencyData.convertTo]
          let max = currencyData.convertFrom;
-         workingArr.forEach(e => {
-             if (parseFloat(currencyData.rates[e]) > parseFloat(currencyData.rates[max])) {
-                 max = e;
+         workingArr.forEach(value => {
+             if (parseFloat(currencyData.rates[value]) > parseFloat(currencyData.rates[max])) {
+                 max = value;
              }
          });
+        
 
-         let divs = workingArr.map((e,ix) => {
-             let height = parseFloat(currencyData.rates[e]) / parseFloat(currencyData.rates[max]) * 100;
-             let attribs = {
-                 onClick: ()=>hiModal(ix),
-                 onMouseOut: showClickedModal[`modal${ix}`] ? ()=>byeModal(ix) : null,
-                 style: {
-                     background: "green",
-                     width: "10%",
-                     display: "inline-block",
-                     height: String(height) + '%',
-                 },
-                 //"data-modalcontainer": `modal${ix}`,
-                 className: showClickedModal[`modal${ix}`] ? `showIt-${ix}` : null,
-                 
+         let divs = workingArr.map((value,ix) => {
+            //?????????
+            //setIsChartModalDisplayed([...isChartModalDisplayed, false]);
+             let height = parseFloat(currencyData.rates[value]) / parseFloat(currencyData.rates[max]) * 100;
+             let needToOffsetTitle = height < 8 ? " u-offset" : "";
+             let attribs1 = {
+                 onMouseOut: isChartModalDisplayed[ix] ? (e)=>modalEventHandler(e,ix) : null,
+            }
+
+             let attribs2 = {
+                style:{
+                    height: String(height) + '%',
+                },
+                onClick: (e)=>modalEventHandler(e,ix),
+                onMouseOver: (e) => e.detail !== 2 ? modalEventHandler(e,ix) : null,
              }
-             return (<div {...attribs}>{e}<div className="thisModal">{e}</div></div>)
+             let isBaseChart = ix === 0 ? "is-baseChart" : null;
+             let calcOffset = `bottom: calc(${height} + 1em)`;
+             let styleOffSet = height < 8 ? {bottom: `calc(${height}% + 1em)`} : {};
+             return (
+                <div {...attribs1} className={`ChartContent-barChartContainer ${isBaseChart}`}>
+                    <div {...attribs2} className={`ChartContent-barChart`}>
+                        <p style={styleOffSet} className={"ChartContent-barChartTitle" + needToOffsetTitle}>{value}</p>
+                        <div className={isChartModalDisplayed[ix] ? "Modal isdisplayed" : "Modal"}>{value}</div>
+                    </div>
+                </div>
+             )
+             
          });
 
          return divs;
      }
 
-
-     function hiModal(ix) {
+     function modalEventHandler(e,ix) {
         let modalName = `modal${ix}`;
-        setShowClickedModal({...showClickedModal, [modalName]: !showClickedModal[modalName]});
+        let newVal = (e.detail === 2 || e.type === "mouseout") ? false : true;
+        let newSet = [...isChartModalDisplayed.slice(0,ix),newVal, ...isChartModalDisplayed.slice(ix+1)];
+        setIsChartModalDisplayed(newSet)
 
-     }
-
-     function byeModal(ix) {
-        let modalName = `modal${ix}`;
-        console.log(`moved off of modal${ix}`, " modal name is ", modalName);
-        setShowClickedModal({...showClickedModal, [modalName]: false});
      }
  }
  export default App;
