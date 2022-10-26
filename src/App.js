@@ -38,6 +38,9 @@
              onClick: handleBaseFilterClick,
              onChange: handleBaseFilterChange,
              value: baseFilterVal,
+             id: 'Configure-baseFilter',
+            className: 'Configure-baseFilter',
+            name:'Configure-baseFilter',
          },
          convertFilter: {
              onKeyUp: handleFilterDownArrow_Convert,
@@ -45,6 +48,9 @@
              onClick: handleConvertFilterClick,
              onChange: handleConvertFilterChange,
              value: convertFilterVal,
+             id:'Configure-comparisonsFilter',
+             class:'Configure-comparisonsFilter',
+             name: 'Configure-comparisonsFilter',
          },
          baseSelect: {
              size: "5",
@@ -56,7 +62,7 @@
              size: "5",
              onKeyUp: handleSelectSpecialKeyPresses_Convert,
              onChange: handleConvertSelectChange,
-             className: "Configure-convertSelectBox"
+             className: "Configure-comparisonsSelectBox"
          }
      }
 
@@ -141,31 +147,50 @@
          <div className="Page" onKeyDown={(e)=>e.keyCode === 13 ? e.preventDefault() : undefined}>
     
     <header className="Header">
-        <p>{currencyData.convertFrom}</p>
-        <div>
-            {currencyData.convertTo.map((o,i)=><p style={{display: "inline"}} onMouseDown={(e)=>console.log(e.target.offsetLeft, ', ',e.target.offsetRight)} key={i}>{o}</p>)}
-        </div>
+    <h1 class='Header-title'>Currency Visualization</h1>
+            <div class='Header-flashContainer'></div>
+         
     </header>
-    <div className="Configure">
+    <section className="Configure">
         <div className="Configure-Base">
-        <p> change your base currency from <span style={{background:"black",color:"white",fontWeight:"bold"}}>{currencyData.convertFrom}</span> </p>
-            <form>
+        <h2 class='Configure-baseHeading'>Change your base currency from <span class='Configure-baseHeadingValue'>{currencyData.convertFrom} </span></h2>
+      
+            <form className='Configure-baseForm'>
             <label>FILTER
-                {BaseFilter()}
-            </label>
-            </form>
+                {BaseFilter()}           </label>
+            
             {BaseSelect()}
+            </form>
         </div>
-        <div className="Configure-Conversion">
-        <p> select {"<="} 5 currencies to compare </p>
-            <form>
+        <div className="Configure-Comparisons">
+        <h2 class='Configure-comparisonHeading'>Select &lt;= 5 currencies to compare</h2>
+        <form className='Configure-comparisonsForm'>
             <label>FILTER
                 {ConvertFilter()} 
               </label>
-            </form>
             {ConvertSelect()}
+            </form>
         </div>
-    </div>
+        <div class='Configure-showCurrentConfigurationContainer'>
+                <div class='Configure-showCurrentConfiguration'>
+                    <div class='Configure-showBaseContainer'>
+                        <h3>Base:</h3>
+                  
+                        <div class='Configure-showBase'><p className='Configure-baseValue'>{currencyData.convertFrom}</p></div>
+                    </div>
+                    <div class='Configure-showComparisonsContainer'>
+                        <h3>Comparisons:</h3>
+                       
+                        <div class='Configure-showComparisons'>{currencyData.convertTo.map(elem=><p className='Configure-comparisonValue'>{elem}</p>)}</div>
+                    </div>
+                </div>
+            </div>
+            <div class='Configure-clearChartsContainer'>
+                <button class='Configure-clearChartsButton'>
+                    Clear charts + comparisons
+                </button>
+            </div>
+    </section>
     <main className="ChartContent">
      
     {makeCharts()}
