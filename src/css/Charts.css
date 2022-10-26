@@ -36,11 +36,12 @@
     position: absolute;
     
     top: 5em;
-    left: 60%;
+    left: 0%;
     writing-mode: vertical-rl;
     text-orientation: upright;
     display: inline-block;
     margin: 0 auto;
+    text-shadow:3px 3px 3px orange;
   }
 
  
@@ -88,14 +89,28 @@
   }
   
 
-  .ChartContent-barChart:not(:hover) .Modal {
+  /* .ChartContent-barChart:not(:hover) .Modal {
     animation: disappearModal 800ms normal forwards;
     animation-iteration-count: 1;
-  }
+  } */
   
+  .Modal.disappearModal {
+    position:absolute;
+    visibility:visible;
+    height:0%;
+    font-size:0;
+    transform:rotate(380deg);
+    transition-property: height, transform, font-size;
+    transition-duration: 900ms;
+     
+
+  } 
+
   .Modal {
     color: var(--Modal-textColor);
-    display: none;
+     
+     
+    visibility:hidden;
     background-color: var(--Modal-backgroundColor);
     border-radius: .6em;
     position: absolute;
@@ -108,7 +123,8 @@
     align-self: unsafe center;
     height: 110px;
     box-shadow: 2px 3px 1px var(--Page-boxShadowColor);
-    z-index: 30;
+    z-index: 20;
+   
   }
   
   /* state of modal = display */
@@ -117,8 +133,10 @@
   
   .Modal.isdisplayed {
     display: flex;
+     visibility:visible;
     position: absolute;
     flex-direction: column;
     justify-content: center;
     align-items: center;
+    opacity:1;
   }

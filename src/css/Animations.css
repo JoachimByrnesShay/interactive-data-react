@@ -53,6 +53,7 @@
   @keyframes disappearModal {
     0% {
       box-shadow: 5px 5px 5px grey;
+      display: flex;
     }
   
     100% {
@@ -61,6 +62,7 @@
       width: 4%;
       font-size: 3px;
       box-shadow: 15px 15px 15px black;
+      display:none;
     }
   }
   

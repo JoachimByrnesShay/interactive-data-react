@@ -43,7 +43,7 @@
     display: grid;
     grid-template-columns: 1fr;
     grid-template-rows: 3fr 5fr 40fr 1fr;
-    background:blue;
+  
   }
   
   .Header {

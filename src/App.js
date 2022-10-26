@@ -66,6 +66,7 @@
          }
      }
 
+     const [isChartModalAnimating, setIsChartModalAnimating] = useState(Array(5).fill(false));
 
      const BaseFilter = () => <input ref={refs.baseFilterRef} {...elemAttribs.baseFilter}/>
      const ConvertFilter = () => <input ref={refs.convertFilterRef} {...elemAttribs.convertFilter}/>
@@ -96,6 +97,7 @@
          convert: false,
      });
 
+    
      const [prevBaseSelectIx, setPrevBaseSelectIx] = useState(-1);
      const [prevConvertSelectIx, setPrevConvertSelectIx] = useState(-1);
      
@@ -410,7 +412,7 @@
                     height: String(height) + '%',
                 },
                 onClick: (e)=>modalEventHandler(e,ix),
-                onMouseOver: (e) => e.detail !== 2 ? modalEventHandler(e,ix) : null,
+                onMouseEnter: (e) => modalEventHandler(e,ix),
              }
              let isBaseChart = ix === 0 ? "is-baseChart" : null;
              let calcOffset = `bottom: calc(${height} + 1em)`;
@@ -419,7 +421,7 @@
                 <div {...attribs1} className={`ChartContent-barChartContainer ${isBaseChart}`}>
                     <div {...attribs2} className={`ChartContent-barChart`}>
                         <p style={styleOffSet} className={"ChartContent-barChartTitle" + needToOffsetTitle}>{value}</p>
-                        <div className={isChartModalDisplayed[ix] ? "Modal isdisplayed" : "Modal"}>{value}</div>
+                        <div onMouseEnter={(e)=>modalEventHandler(e,ix)} onMouseOver={(e)=>modalEventHandler(e,ix)} onClick={(e)=>modalEventHandler(e,ix)} className={isChartModalDisplayed[ix] ? "Modal isdisplayed" : (isChartModalAnimating[ix] ? "Modal disappearModal" : "Modal")}><p>{currencyData.fullNames[value]}</p><p>1 {currencyData.convertFrom}=={currencyData.rates[value]} {value}</p></div>
                     </div>
                 </div>
              )
@@ -430,10 +432,18 @@
      }
 
      function modalEventHandler(e,ix) {
+        console.log('events here: ');
+        console.log(e);
+
         let modalName = `modal${ix}`;
-        let newVal = (e.detail === 2 || e.type === "mouseout") ? false : true;
-        let newSet = [...isChartModalDisplayed.slice(0,ix),newVal, ...isChartModalDisplayed.slice(ix+1)];
-        setIsChartModalDisplayed(newSet)
+        let thisModelDisplayState = (e.detail ==2 || e.type === "mouseout") ? false : true;
+        let animating = !thisModelDisplayState;
+        //false newVal means no longer displaying so here we should set animation into Effect;
+        let resetIsChartModalAnimating = [...isChartModalAnimating.splice(0, ix), animating, ...isChartModalAnimating.splice(ix+1)];
+       
+        let newSet = [...isChartModalDisplayed.slice(0,ix),thisModelDisplayState, ...isChartModalDisplayed.slice(ix+1)];
+        setIsChartModalAnimating(resetIsChartModalAnimating);
+        setIsChartModalDisplayed(newSet);
 
      }
  }
