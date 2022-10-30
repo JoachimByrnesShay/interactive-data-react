@@ -34,6 +34,7 @@
   
   .Configure-baseFilter, .Configure-comparisonsFilter {
     max-width: 4em;
+    margin-left:1em;
   }
   
   .Configure-baseFilterLabel, .Configure-comparisonsFilterLabel {
@@ -57,6 +58,8 @@
     color: black;
     text-shadow: 1px 1px 1px grey;
   }
+
+ 
   
   /* select box options */
   
@@ -159,6 +162,7 @@
     text-shadow: initial;
   }
   
+  
   /* display and sizing controls for container of clear charts button and for display area of current base/comparisons selections */
   
   .Configure-showCurrentConfigurationContainer, .Configure-clearChartsContainer {
@@ -173,6 +177,12 @@
     width: fit-content;
     justify-content: space-between;
   }
+
+  .Configure-showCurrentConfigurationContainer {
+    border: 3px solid black;
+    border-radius: 3px;
+    padding:0;
+  }
   
   /* apply this animation to draw users attention to current configurations when these classes added */
   
@@ -184,9 +194,50 @@
   .Configure-showCurrentConfiguration {
     display: flex;
     align-self: center;
-    justify-content: space-between;
+    justify-content: space-around;
     width: 19em;
-    margin: 0 .5em 0 .5em;
+    margin: 0;
+   
+
+
+  }
+
+  .Configure-showCurrentConfigurationContainer, .Configure-clearChartsContainer {
+    background: beige;
+    border-radius: 5px;
+    min-width: 10em;
+    width: 22em;
+    margin-top: 1.2em;
+    margin-left: 5%;
+    display: grid;
+    align-self: center;
+    width: fit-content;
+    justify-content: space-between;
+  }
+  
+
+  .Configure-showBaseContainer, .Configure-showComparisonsContainer {
+   
+  }
+
+  .Configure-showComparisonsContainer {
+    background-color:hsl(160,79%,85%);
+    padding:.5em;
+  }
+  .Configure-showBaseContainer {
+     
+     background-color:hsl(110,29%,95%);
+     padding:.5em;
+     background-image: repeating-linear-gradient(
+    45deg,
+    transparent,
+    transparent 1px,
+    /* #90a4ae 1px,
+    #90a4ae 2px */
+    beige 1px,
+    lightsalmon 2px
+  );
+
   }
   
   .Configure-clearChartsButton {

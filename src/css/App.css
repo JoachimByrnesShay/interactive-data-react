@@ -43,6 +43,8 @@
     display: grid;
     grid-template-columns: 1fr;
     grid-template-rows: 3fr 5fr 40fr 1fr;
+    font-family: 'Nunito', sans-serif;
+    font-weight: 400;
   
   }
   
@@ -59,5 +61,89 @@
     background:beige;
   }
 
+  .Header {
+    background: var(--Header-backgroundColor);
+    align-items: stretch;
+    padding: .3em;
+    display: grid;
+    grid-template-columns: 3fr 5fr;
+  }
+  
+  .Header-title {
+    font-weight: 400;
+    font-size: 16px;
+    color: var(--Header-textColor);
+    text-transform: uppercase;
+    justify-self: flex-start;
+    display: flex;
+    align-items: center;
+    margin-left: 5%;
+  }
   
 
+  .Header-flashContainer {
+    color: var(--Header-flashContainer-textColor);
+    text-shadow: 2px 3px 6px black;
+    font-weight: bold;
+    
+     
+    padding: 0;
+   
+    visibility: hidden;
+            opacity: 0;
+            transition: visibility 0s 2s, opacity 2s linear;
+   
+  }
+
+  .Header-flashContainer.isDisplayed {
+    visibility: visible;
+            opacity: 1;
+            transition: opacity 0s linear;
+    background: var(--Header-flashMessageColor);
+    
+    
+  }
+
+/*  @keyframes flashMessageInHeader {
+    0% {
+      display: flex;
+      background: var(--Header-flashMessageColor);
+    }
+  
+    80% {
+      opacity: 1;
+    }
+  
+    100% {
+      background: var(--Header-flashMessageColor);
+      opacity: 0;
+    }
+  }
+  .Header-flashContainer.isDisplayed {
+      animation: flashMessageInHeader 4500ms normal forwards;
+  animation-iteration-count: 1;
+  }*/
+  
+  .Header-flashContainer {
+    display: grid;
+    grid-template-rows: 1fr;
+    grid-template-columns: 1fr;
+    border-radius: 7px;
+    justify-items: center;
+    align-items: center;
+    font-size: 90%;
+    background: var(--Header-flashMessageColor);
+  }
+  
+  .Header-flashMessage {
+    margin: 0 !important;
+    padding: 0 !important;
+    background: var(--Header-flashMessageColor) !important;
+  }
+  
+  /* flash message when user tries to select a 6th comparison currency */
+  
+  /* .Header-flashMessage.Header-flashContainer {
+    animation: flashMessageInHeader 4500ms normal forwards;
+    animation-iteration-count: 1;
+  } */
