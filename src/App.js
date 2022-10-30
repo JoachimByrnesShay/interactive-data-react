@@ -27,7 +27,8 @@
 
 
      // modulate show or hide of modal with boolean value, ternary expression uses this in jsx build of modal attributes, i.e. related functions
-     const [isChartModalDisplayed, setIsChartModalDisplayed] = useState(Array(7).fill(false));
+       const [isChartModalDisplayed, setIsChartModalDisplayed] = useState(Array(7).fill(false));
+     const [isChartModalAnimating, setIsChartModalAnimating] = useState(Array(7).fill(false));
 
      const [isFlashDisplayed, setIsFlashDisplayed] = useState(false);
 
@@ -78,7 +79,6 @@
          }
      }
 
-     const [isChartModalAnimating, setIsChartModalAnimating] = useState(Array(5).fill(false));
 
      const BaseFilter = () => <input {...elemAttribs.baseFilter}/>
 
@@ -159,9 +159,9 @@
 
      // clean this up, define functions for these, comb and weed unnecessary code
 
-    // useEffect(() => {if (isFlashDisplayed){
-    //   setTimeout(()=>{setIsFlashDisplayed(false)}, 2000);
-    // }}, [isFlashDisplayed]);
+    useEffect(() => {if (isFlashDisplayed){
+      setTimeout(()=>{setIsFlashDisplayed(false)}, 2000);
+    }}, [isFlashDisplayed]);
 
      useEffect(() => {
          if (focusInSelect.base) {
@@ -205,7 +205,7 @@
     <header className="Header">
     <h1 className='Header-title'>Currency Visualization</h1>
             <div className={`Header-flashContainer ${isFlashDisplayed ? "isDisplayed" : ""}`}>
-                <p className={'Header-flashMessage'}>SELECT NO MORE THAN 5 COMPARISONS.<br/>TO DESELECT A SELECTED CHOICE, i.e click it.</p>
+                <p className={'Header-flashMessage'}>SELECT NO MORE THAN 7 COMPARISONS.<br/>TO DESELECT A SELECTED CHOICE, i.e click it.</p>
             </div>
     </header>
     <section className="Configure">
@@ -345,14 +345,17 @@
              if (currencySelections.convertTo.includes(val)) {
                  let ix = currencySelections.convertTo.indexOf(val);
                  console.log(ix);
-                 let endIx = currencySelections.convertTo.length - 1;
                  let leftArr = currencySelections.convertTo.slice(0, ix);
-                 let rightArr = currencySelections.convertTo.slice(ix + 1, endIx + 1);
+                 let rightArr = currencySelections.convertTo.slice(ix + 1);
                  newArr = [...leftArr, ...rightArr];
-             } else {
+             } else if (currencySelections.convertTo.length >= 7){
+                setIsFlashDisplayed(true);
+                return;
+             }  else {
                  newArr = [...currencySelections.convertTo, val]
              }
-             setCurrencySelections({ ...currencySelections, convertTo: alphabetizeStringArr(newArr)})
+             newArr = alphabetizeStringArr(newArr);
+             setCurrencySelections({ ...currencySelections, convertTo: newArr})
          }
      }
 
@@ -453,7 +456,7 @@
          let ix = refs.baseSelectRef.current.selectedIndex;
          setPrevBaseSelectIx(ix);
          console.log('clicked on option: ', focusInSelect);
-         if (e.detail === 2) {
+         if (e.detail >= 2) {
              setCurrencySelections({ ...currencySelections, convertFrom: optionVal })
          }
      }
@@ -461,16 +464,15 @@
      function handleOptionClick_convert(optionVal, e) {
          let ix = refs.convertSelectRef.current.selectedIndex;
          setPrevConvertSelectIx(ix);
-         if (e.detail === 2) {
+         if (e.detail >= 2) {
             console.log('2 in handleOptionClick_convert');
              let newArr;
              let val = optionVal;
              
              if (currencySelections.convertTo.includes(val)) {
-                alert(val);
+
                  let ix = currencySelections.convertTo.indexOf(val);
                  console.log(ix);
-                 let endIx = currencySelections.convertTo.length - 1;
                  let leftArr = currencySelections.convertTo.slice(0, ix);
                  let rightArr = currencySelections.convertTo.slice(ix + 1);
                  newArr = [...leftArr, ...rightArr];
@@ -551,18 +553,29 @@
      }
 
      function modalEventHandler(e,ix) {
+        if (!(e.type === 'mouseout' || e.detail === 2)){
+            return;
+        }
         console.log('events here: ');
         console.log(e);
 
         let modalName = `modal${ix}`;
-        let thisModelDisplayState = (e.type === "mouseout") ? false : true;
-        let animating = !thisModelDisplayState;
+        let thisModalDisplayState;
+
+        if (e.type === 'mouseout'){
+            thisModalDisplayState = false;
+        } else if (e.detail === 2 && isChartModalDisplayed[ix]){
+            thisModalDisplayState = false;
+        } else if (e.detail === 2) {
+            thisModalDisplayState = true; 
+        }
+        let animating = !thisModalDisplayState;
         //false newVal means no longer displaying so here we should set animation into Effect;
         let resetIsChartModalAnimating = [...isChartModalAnimating.splice(0, ix), animating, ...isChartModalAnimating.splice(ix+1)];
        
-        let newSet = [...isChartModalDisplayed.slice(0,ix),thisModelDisplayState, ...isChartModalDisplayed.slice(ix+1)];
+        let newDisplaySet = [...isChartModalDisplayed.slice(0,ix),thisModalDisplayState, ...isChartModalDisplayed.slice(ix+1)];
         setIsChartModalAnimating(resetIsChartModalAnimating);
-        setIsChartModalDisplayed(newSet);
+        setIsChartModalDisplayed(newDisplaySet);
 
      }
  }
