@@ -126,9 +126,9 @@
 
      // clean this up, define functions for these, comb and weed unnecessary code
 
-    useEffect(() => {if (isFlashDisplayed){
-      setTimeout(()=>{setIsFlashDisplayed(false)}, 2000);
-    }}, [isFlashDisplayed]);
+    // useEffect(() => {if (isFlashDisplayed){
+    //   setTimeout(()=>{setIsFlashDisplayed(false)}, 2000);
+    // }}, [isFlashDisplayed]);
 
      useEffect(() => {
          if (focusInSelect.base) {
