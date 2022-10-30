@@ -87,46 +87,8 @@
     color: var(--Header-flashContainer-textColor);
     text-shadow: 2px 3px 6px black;
     font-weight: bold;
-    
-     
     padding: 0;
    
-    visibility: hidden;
-            opacity: 0;
-            transition: visibility 0s 2s, opacity 2s linear;
-   
-  }
-
-  .Header-flashContainer.isDisplayed {
-    visibility: visible;
-            opacity: 1;
-            transition: opacity 0s linear;
-    background: var(--Header-flashMessageColor);
-    
-    
-  }
-
-/*  @keyframes flashMessageInHeader {
-    0% {
-      display: flex;
-      background: var(--Header-flashMessageColor);
-    }
-  
-    80% {
-      opacity: 1;
-    }
-  
-    100% {
-      background: var(--Header-flashMessageColor);
-      opacity: 0;
-    }
-  }
-  .Header-flashContainer.isDisplayed {
-      animation: flashMessageInHeader 4500ms normal forwards;
-  animation-iteration-count: 1;
-  }*/
-  
-  .Header-flashContainer {
     display: grid;
     grid-template-rows: 1fr;
     grid-template-columns: 1fr;
@@ -135,6 +97,28 @@
     align-items: center;
     font-size: 90%;
     background: var(--Header-flashMessageColor);
+    visibility: hidden;
+    opacity: 0;
+    transition: visibility 0s 2s ease-out, opacity 2s ease-out;
+   
+  }
+
+  .Header-flashContainer.isDisplayed {
+    visibility: visible;
+    opacity: 1;
+    transition: opacity 0s linear;
+    background: var(--Header-flashMessageColor);
+    
+  }
+
+
+  .Header-flashContainer.isDisplayed {
+      animation: flashMessageInHeader 4500ms normal forwards;
+  animation-iteration-count: 1;
+  }
+  
+  .Header-flashContainer {
+    
   }
   
   .Header-flashMessage {

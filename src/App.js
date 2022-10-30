@@ -27,7 +27,7 @@
 
 
      // modulate show or hide of modal with boolean value, ternary expression uses this in jsx build of modal attributes, i.e. related functions
-     const [isChartModalDisplayed, setIsChartModalDisplayed] = useState(Array(5).fill(false));
+     const [isChartModalDisplayed, setIsChartModalDisplayed] = useState(Array(7).fill(false));
 
      const [isFlashDisplayed, setIsFlashDisplayed] = useState(false);
 
@@ -107,7 +107,7 @@
      //currencySelections, currencyInfo
      const [currencySelections, setCurrencySelections] = useState({
         convertFrom: 'USD',
-         convertTo: ['AED', 'BGN', 'CNY', 'EUR', 'GBP'],
+        convertTo: ['AED', 'BGN', 'CNY', 'EUR', 'GBP'],
          
      });
 
@@ -135,14 +135,14 @@
 
      // note 10/24--- as of the current state of the app, this below useEffect call cannot use currencyData as a dependency, it will be called too frequently
      useEffect(fetchAll, []);
-         useEffect(()=>alphabetizeComparisons, [currencySelections]);
+        // useEffect(()=>alphabetizeComparisons, [currencySelections]);
    
          // will not be more than 7 items
-     function alphabetizeComparisons() {
+     function alphabetizeStringArr(arr) {
         // sort copy of values;
         console.log('yes i should be alphabetizing')
-        let arr = [...currencySelections.convertTo].sort();
-        return arr;
+        let arr2 = [...arr].sort();
+        return arr2;
      }
 
      useEffect(() => {
@@ -352,7 +352,7 @@
              } else {
                  newArr = [...currencySelections.convertTo, val]
              }
-             setCurrencySelections({ ...currencySelections, convertTo: alphabetizeComparisons(newArr)})
+             setCurrencySelections({ ...currencySelections, convertTo: alphabetizeStringArr(newArr)})
          }
      }
 
@@ -462,6 +462,7 @@
          let ix = refs.convertSelectRef.current.selectedIndex;
          setPrevConvertSelectIx(ix);
          if (e.detail === 2) {
+            console.log('2 in handleOptionClick_convert');
              let newArr;
              let val = optionVal;
              
@@ -477,11 +478,11 @@
                 setIsFlashDisplayed(true);
                 return; 
              } else {
-                 newArr = alphabetizeComparisons([...currencySelections.convertTo, val]);
-
+                 newArr = [...currencySelections.convertTo, val];
              }
-
-             setCurrencySelections({ ...currencySelections, convertTo: alphabetizeComparisons(newArr)})
+             newArr = alphabetizeStringArr(newArr);
+             console.log('newArr in handleoptionclick is :', newArr);
+             setCurrencySelections({ ...currencySelections, convertTo: newArr})
          }
      }
      // not sure if we need to check onChange on select with the current implementation above, ok without using it so far in Firefox, check Chrome, Edge, etc browsers
@@ -510,7 +511,7 @@
              let size = parseFloat(currencyInfo.rates[value]) / parseFloat(currencyInfo.rates[max]) * 100;
              let needToOffsetTitle = size < 8 ? " u-offset" : "";
              let attribs1 = {
-                 onMouseOut: isChartModalDisplayed[ix] ? (e)=>modalEventHandler(e,ix) : null,
+                
             }
         
 
@@ -521,7 +522,8 @@
                 style:{[dimension]: String(size) + '%',
                 },
                 onClick: (e)=>modalEventHandler(e,ix),
-                onMouseEnter: (e) => modalEventHandler(e,ix),
+                 onMouseOut: isChartModalDisplayed[ix] ? (e)=>modalEventHandler(e,ix) : null
+                 
              }
        
              let isBaseChart = ix === 0 ? "is-baseChart" : null;
@@ -532,8 +534,8 @@
                     <div {...attribs2} className={`ChartContent-barChart`}>
                         <p style={styleOffSet} className={"ChartContent-barChartTitle" + needToOffsetTitle}>{value}</p>
                         <div 
-                            onMouseEnter={(e)=>modalEventHandler(e,ix)} 
-                            onMouseOver={(e)=>modalEventHandler(e,ix)} 
+                             
+                        
                             onClick={(e)=>modalEventHandler(e,ix)} 
                             className={isChartModalDisplayed[ix] ? "Modal isdisplayed" : (isChartModalAnimating[ix] ? "Modal disappearModal" : "Modal")}>
                             <p>{currencyInfo.fullNames[value]}</p>
@@ -553,7 +555,7 @@
         console.log(e);
 
         let modalName = `modal${ix}`;
-        let thisModelDisplayState = (e.detail ==2 || e.type === "mouseout") ? false : true;
+        let thisModelDisplayState = (e.type === "mouseout") ? false : true;
         let animating = !thisModelDisplayState;
         //false newVal means no longer displaying so here we should set animation into Effect;
         let resetIsChartModalAnimating = [...isChartModalAnimating.splice(0, ix), animating, ...isChartModalAnimating.splice(ix+1)];
