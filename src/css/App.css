@@ -14,6 +14,7 @@
     --Page-backgroundColor: #cddeee;
     --Header-backgroundColor: #38598b;
     --Footer-backgroundColor: rgb(51, 66, 87);
+    --Footer-textColor:  white;
     --ChartContent-linearGradientBackground: linear-gradient(to bottom, #ebf1f6 0%,#abd3ee 50%,#2ec3eb 51%,#d5ebfb 100%);
     --ChartContent-borderColor: black;
     --ChartContent-barChart-boxShadowColor: grey;
@@ -40,6 +41,7 @@
     height: 100vh;
     padding: 0 10vw 0 10vw;
     background: var(--Page-backgroundColor);
+    color:  var(--Page-textColor);
     display: grid;
     grid-template-columns: 1fr;
     grid-template-rows: 3fr 5fr 40fr 1fr;
@@ -147,3 +149,12 @@
     animation: flashMessageInHeader 4500ms normal forwards;
     animation-iteration-count: 1;
   } */
+
+
+
+.Footer {
+  padding-left: .5em;
+  background: var(--Footer-backgroundColor);
+  display: flex;
+  color: var(--Footer-textColor);
+}

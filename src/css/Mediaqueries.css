@@ -1,0 +1,67 @@
+@media only screen and (max-width: 950px) {
+  .ChartContent {/*change orientetion of .ChartContent flex items on smaller screens, i.e. vertical to horizontal barCharts */
+    flex-direction: column;
+    justify-content: space-around;
+  }
+
+  .ChartContent-barChartContainer {/* charts are adjusted to be appropriately styled for re-orientation to horizontal charts on small screens, vs vertical on 950px+ screens */
+    width: 100%;
+    height: inherit;
+    height: 5em;
+  }
+
+  .ChartContent-barChart {/* since ChartContent-barCharts have INLINE hardcoded styling of height in html for default vertical charts, use !important to change height for this class in css stylesheet *//* height: 60%;height: 5vh;
+ */
+    justify-self: flex-end;
+    align-self: center;
+    border-radius: 0 .3em .3em 0;
+    border-width: 2px 7px 2px 0px;
+    font-size: 95%;
+    justify-content: flex-start;
+    align-items: center;
+    padding-left: .5em;
+    padding-top: 0;
+    height: 90%;
+  }
+
+  .ChartContent-indicateBase {/* on small screen, display of "base currency" indicator text for base currency chart displays horizontally, changed from vertical */
+    top: 30%;
+    left: 60%;
+    writing-mode: horizontal-tb;
+    text-orientation: mixed;
+  }
+
+  .Modal {/*modal is absolutely positioned to ChartContent-container, whose height and width have been changed on small screens*/
+    top: 0;
+    left: 10%;
+    height: 100%;
+    align-items: center;
+    align-self: center;
+  }
+}
+
+@media only screen and (max-width: 640px) {
+  .Header {
+    grid-template-columns: 1fr;
+    grid-template-rows: 1fr;
+  }
+
+  .Header-title {
+    color: transparent;
+  }
+}
+
+/* make acceptably responsive for extremely small-width screen devices */
+
+@media only screen and (max-width:  330px) {
+  .ChartContent-barChart {
+    align-items: center;
+    font-size: .9em;
+    padding-top: 9%;
+    padding-bottom: 5%;
+  }
+
+  .Footer, .Header-title {
+    font-size: 70%;
+  }
+}

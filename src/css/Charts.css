@@ -140,3 +140,17 @@
     align-items: center;
     opacity:1;
   }
+
+  /* style container which displays the "base currency" label for the chart which represents the base currency */
+
+.ChartContent-indicateBase {
+  position: absolute;
+  color: transparent;
+  top: 5em;
+  left: 60%;
+  writing-mode: vertical-rl;
+  text-orientation: upright;
+  display: inline-block;
+  margin: 0 auto;
+  text-shadow: 3px 5px 3px black;
+}

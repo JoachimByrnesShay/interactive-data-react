@@ -25,12 +25,13 @@
      }
 
 
+
      // modulate show or hide of modal with boolean value, ternary expression uses this in jsx build of modal attributes, i.e. related functions
      const [isChartModalDisplayed, setIsChartModalDisplayed] = useState(Array(5).fill(false));
 
      const [isFlashDisplayed, setIsFlashDisplayed] = useState(false);
 
-
+     const [isSmallScreen, setIsSmallScreen] = useState(false);
      const [baseFilterVal, setBaseFilterVal] = useState("");
      const [convertFilterVal, setConvertFilterVal] = useState("");
 
@@ -84,25 +85,36 @@
      const ConvertFilter = () => <input {...elemAttribs.convertFilter}/>
 
      const BaseSelect = () => {
-         let options = Object.keys(currencyData.fullNames).filter(o => baseFilteredVal(o)).map((o, i) => baseCreateOption(o, i));
+         let options = Object.keys(currencyInfo.fullNames).filter(o => baseFilteredVal(o)).map((o, i) => baseCreateOption(o, i));
          return <select {...elemAttribs.baseSelect}>
                     {options}
                 </select>
      }
      const ConvertSelect = () => {
-         let options = Object.keys(currencyData.fullNames).filter(o => convertToFilteredVal(o)).map((o, i) => convertCreateOption(o, i));
+         let options = Object.keys(currencyInfo.fullNames).filter(o => convertToFilteredVal(o)).map((o, i) => convertCreateOption(o, i));
          return <select {...elemAttribs.convertSelect}>
                     {options}
                 </select>
      }
 
     // this might be less hassle if I break this into 3 or 4 different state variables, or at least 2.
-     const [currencyData, setcurrencyData] = useState({
-         convertFrom: 'USD',
-         convertTo: ['EUR', 'GBP', 'CNY', 'BGN', 'AED'],
-         rates: {},
-         fullNames: {},
+     // const [currencyData, setCurrencyData] = useState({
+     //     convertFrom: 'USD',
+     //     convertTo: ['AED', 'BGN', 'CNY', 'EUR', 'GBP'],
+     //     rates: {},
+     //     fullNames: {},
+     // });
+     //currencySelections, currencyInfo
+     const [currencySelections, setCurrencySelections] = useState({
+        convertFrom: 'USD',
+         convertTo: ['AED', 'BGN', 'CNY', 'EUR', 'GBP'],
+         
      });
+
+     const [currencyInfo, setCurrencyInfo] = useState({
+        rates: {},
+         fullNames: {},
+     })
 
      const [focusInSelect, setFocusInSelect] = useState({
          base: false,
@@ -114,7 +126,7 @@
          convert: false,
      });
 
-    
+    const [windowWidthValue, setWindowWidthValue] = useState(null);
      const [prevBaseSelectIx, setPrevBaseSelectIx] = useState(-1);
      const [prevConvertSelectIx, setPrevConvertSelectIx] = useState(-1);
      
@@ -123,6 +135,27 @@
 
      // note 10/24--- as of the current state of the app, this below useEffect call cannot use currencyData as a dependency, it will be called too frequently
      useEffect(fetchAll, []);
+         useEffect(()=>alphabetizeComparisons, [currencySelections]);
+   
+         // will not be more than 7 items
+     function alphabetizeComparisons() {
+        // sort copy of values;
+        console.log('yes i should be alphabetizing')
+        let arr = [...currencySelections.convertTo].sort();
+        return arr;
+     }
+
+     useEffect(() => {
+        window.addEventListener('resize', handleWindowWidth);
+        function handleWindowWidth() {   
+                if (window.innerWidth < 950) {
+                    setIsSmallScreen(true);
+                } else {
+                    setIsSmallScreen(false);
+                }
+            }
+        handleWindowWidth();
+        },[]);
 
      // clean this up, define functions for these, comb and weed unnecessary code
 
@@ -179,9 +212,9 @@
         <div className="Configure-Base">
         <h2 className='Configure-baseHeading'>Change your base currency from 
             <span className='Configure-baseHeadingValue'
-                data-tooltip-title={currencyData.fullNames[currencyData.convertFrom]} 
+                data-tooltip-title={currencyInfo.fullNames[currencySelections.convertFrom]} 
             >
-                {currencyData.convertFrom} 
+                {currencySelections.convertFrom} 
             </span>
         </h2>
       
@@ -209,9 +242,9 @@
                         <div 
                             className='Configure-showBaseContainer'>
                             <p className='Configure-baseValue'
-                                data-tooltip-title={currencyData.fullNames[currencyData.convertFrom]} 
+                                data-tooltip-title={currencyInfo.fullNames[currencySelections.convertFrom]} 
                             >
-                            {currencyData.convertFrom}
+                            {currencySelections.convertFrom}
                             </p>
                         </div>
                     </div>
@@ -219,9 +252,9 @@
                         <h3>Comparisons:</h3>
                        
                         <div className='Configure-showComparisons'>
-                            {currencyData.convertTo.map(elem=>
+                            {currencySelections.convertTo.map(elem=>
                                 <p className='Configure-comparisonValue' 
-                                    data-tooltip-title={currencyData.fullNames[elem]}>
+                                    data-tooltip-title={currencyInfo.fullNames[elem]}>
                                     {elem}
                                 </p>
                             )}
@@ -259,12 +292,12 @@
      }
 
      function baseCreateOption(o, i) {
-         return <option value={o} key={i} className={'Configure-baseOption'} onMouseEnter={(e)=>{e.target.selected='selected'}} onClick={(e)=>handleOptionClick_base(o,e)}>{o}: {currencyData.fullNames[o]}</option>
+         return <option value={o} key={i} className={'Configure-baseOption'} onMouseEnter={(e)=>{e.target.selected='selected'}} onClick={(e)=>handleOptionClick_base(o,e)}>{o}: {currencyInfo.fullNames[o]}</option>
      }
 
      function convertToFilteredVal(o) {
          let val = o.toLowerCase().startsWith(convertFilterVal.toLowerCase());
-         return val && (o.toLowerCase() !== currencyData.convertFrom.toLowerCase());
+         return val && (o.toLowerCase() !== currencySelections.convertFrom.toLowerCase());
      }
 
      function convertCreateOption(o, i) {
@@ -272,10 +305,10 @@
             option value={o} 
             onMouseEnter={(e)=>{e.preventDefault();e.target.selected='selected'}} 
             key={i} 
-            className={currencyData.convertTo.includes(o) ? 'Configure-comparisonOption is-selectedComparison' : 'Configure-comparisonOption'} 
+            className={currencySelections.convertTo.includes(o) ? 'Configure-comparisonOption is-selectedComparison' : 'Configure-comparisonOption'} 
             onClick={(e)=>handleOptionClick_convert(o,e)}
             >
-            {o}: {currencyData.fullNames[o]}
+            {o}: {currencyInfo.fullNames[o]}
         </option>
      }
 
@@ -292,9 +325,9 @@
              // when the enter key is pressed on an option, set the "currency to convert from" to the selected option
              let val = refs.baseSelectRef.current.options[refs.baseSelectRef.current.selectedIndex].value;
 
-             console.log(currencyData.convertFrom);
-             let argu = { ...currencyData, convertFrom: val };
-             setcurrencyData(argu);
+             console.log(currencySelections.convertFrom);
+             let argu = { ...currencySelections, convertFrom: val };
+             setCurrencySelections(argu);
          }
      }
 
@@ -309,17 +342,17 @@
          } else if (e.key === 'Enter') {
              let newArr;
              let val = refs.convertSelectRef.current.options[refs.convertSelectRef.current.selectedIndex].value;
-             if (currencyData.convertTo.includes(val)) {
-                 let ix = currencyData.convertTo.indexOf(val);
+             if (currencySelections.convertTo.includes(val)) {
+                 let ix = currencySelections.convertTo.indexOf(val);
                  console.log(ix);
-                 let endIx = currencyData.convertTo.length - 1;
-                 let leftArr = currencyData.convertTo.slice(0, ix);
-                 let rightArr = currencyData.convertTo.slice(ix + 1, endIx + 1);
+                 let endIx = currencySelections.convertTo.length - 1;
+                 let leftArr = currencySelections.convertTo.slice(0, ix);
+                 let rightArr = currencySelections.convertTo.slice(ix + 1, endIx + 1);
                  newArr = [...leftArr, ...rightArr];
              } else {
-                 newArr = [...currencyData.convertTo, val]
+                 newArr = [...currencySelections.convertTo, val]
              }
-             setcurrencyData({ ...currencyData, convertTo: newArr })
+             setCurrencySelections({ ...currencySelections, convertTo: alphabetizeComparisons(newArr)})
          }
      }
 
@@ -386,7 +419,7 @@
      }
 
      function fetchAll() {
-         let baseRates = `latest.json?app_id=${FetchConstants.app_id}&base='${currencyData.convertFrom}'`;
+         let baseRates = `latest.json?app_id=${FetchConstants.app_id}&base='${currencySelections.convertFrom}'`;
          let baseSubURLfullNames = 'currencies.json';
          let ratesURL = FetchConstants.baseURL + baseRates;
          let namesURL = FetchConstants.baseURL + baseSubURLfullNames;
@@ -394,7 +427,8 @@
             .then((namesData) => {
                  fetch(ratesURL).then(response => response.json())
                      .then(ratesResults => {
-                         setcurrencyData({ ...currencyData, rates: ratesResults.rates, fullNames: namesData });
+
+                         setCurrencyInfo({ ...currencyInfo, rates: ratesResults.rates, fullNames: namesData });
                      })
              });
      }
@@ -420,7 +454,7 @@
          setPrevBaseSelectIx(ix);
          console.log('clicked on option: ', focusInSelect);
          if (e.detail === 2) {
-             setcurrencyData({ ...currencyData, convertFrom: optionVal })
+             setCurrencySelections({ ...currencySelections, convertFrom: optionVal })
          }
      }
 
@@ -431,22 +465,23 @@
              let newArr;
              let val = optionVal;
              
-             if (currencyData.convertTo.includes(val)) {
+             if (currencySelections.convertTo.includes(val)) {
                 alert(val);
-                 let ix = currencyData.convertTo.indexOf(val);
+                 let ix = currencySelections.convertTo.indexOf(val);
                  console.log(ix);
-                 let endIx = currencyData.convertTo.length - 1;
-                 let leftArr = currencyData.convertTo.slice(0, ix);
-                 let rightArr = currencyData.convertTo.slice(ix + 1, endIx + 1);
+                 let endIx = currencySelections.convertTo.length - 1;
+                 let leftArr = currencySelections.convertTo.slice(0, ix);
+                 let rightArr = currencySelections.convertTo.slice(ix + 1);
                  newArr = [...leftArr, ...rightArr];
-             } else if (currencyData.convertTo.length >= 7){
+             } else if (currencySelections.convertTo.length >= 7){
                 setIsFlashDisplayed(true);
                 return; 
+             } else {
+                 newArr = alphabetizeComparisons([...currencySelections.convertTo, val]);
+
              }
-             else {
-                 newArr = [...currencyData.convertTo, val]
-             }
-             setcurrencyData({ ...currencyData, convertTo: newArr })
+
+             setCurrencySelections({ ...currencySelections, convertTo: alphabetizeComparisons(newArr)})
          }
      }
      // not sure if we need to check onChange on select with the current implementation above, ok without using it so far in Firefox, check Chrome, Edge, etc browsers
@@ -460,10 +495,10 @@
 
      function makeCharts() {
 
-         let workingArr = [currencyData.convertFrom, ...currencyData.convertTo]
-         let max = currencyData.convertFrom;
+         let workingArr = [currencySelections.convertFrom, ...currencySelections.convertTo]
+         let max = currencySelections.convertFrom;
          workingArr.forEach(value => {
-             if (parseFloat(currencyData.rates[value]) > parseFloat(currencyData.rates[max])) {
+             if (parseFloat(currencyInfo.rates[value]) > parseFloat(currencyInfo.rates[max])) {
                  max = value;
              }
          });
@@ -472,27 +507,38 @@
          let divs = workingArr.map((value,ix) => {
             //?????????
             //setIsChartModalDisplayed([...isChartModalDisplayed, false]);
-             let height = parseFloat(currencyData.rates[value]) / parseFloat(currencyData.rates[max]) * 100;
-             let needToOffsetTitle = height < 8 ? " u-offset" : "";
+             let size = parseFloat(currencyInfo.rates[value]) / parseFloat(currencyInfo.rates[max]) * 100;
+             let needToOffsetTitle = size < 8 ? " u-offset" : "";
              let attribs1 = {
                  onMouseOut: isChartModalDisplayed[ix] ? (e)=>modalEventHandler(e,ix) : null,
             }
+        
 
-             let attribs2 = {
-                style:{
-                    height: String(height) + '%',
+            //let dimension = (Math.max(document.documentElement.clientWidth || 0, window.innerWidth || 0)) > 950 ? 'height' : 'width';
+            let dimension = isSmallScreen ? 'width' : 'height';
+           // dimension === 'width' ? setIsSmallScreen(true) : setIsSmallScreen(false);
+            let attribs2 = {
+                style:{[dimension]: String(size) + '%',
                 },
                 onClick: (e)=>modalEventHandler(e,ix),
                 onMouseEnter: (e) => modalEventHandler(e,ix),
              }
+       
              let isBaseChart = ix === 0 ? "is-baseChart" : null;
-             let calcOffset = `bottom: calc(${height} + 1em)`;
-             let styleOffSet = height < 8 ? {bottom: `calc(${height}% + 1em)`} : {};
+             let calcOffset = `bottom: calc(${size} + 1em)`;
+             let styleOffSet = size < 8 ? {bottom: `calc(${size}% + 1em)`} : {};
              return (
                 <div {...attribs1} className={`ChartContent-barChartContainer ${isBaseChart}`}>
                     <div {...attribs2} className={`ChartContent-barChart`}>
                         <p style={styleOffSet} className={"ChartContent-barChartTitle" + needToOffsetTitle}>{value}</p>
-                        <div onMouseEnter={(e)=>modalEventHandler(e,ix)} onMouseOver={(e)=>modalEventHandler(e,ix)} onClick={(e)=>modalEventHandler(e,ix)} className={isChartModalDisplayed[ix] ? "Modal isdisplayed" : (isChartModalAnimating[ix] ? "Modal disappearModal" : "Modal")}><p>{currencyData.fullNames[value]}</p><p>1 {currencyData.convertFrom}=={currencyData.rates[value]} {value}</p></div>
+                        <div 
+                            onMouseEnter={(e)=>modalEventHandler(e,ix)} 
+                            onMouseOver={(e)=>modalEventHandler(e,ix)} 
+                            onClick={(e)=>modalEventHandler(e,ix)} 
+                            className={isChartModalDisplayed[ix] ? "Modal isdisplayed" : (isChartModalAnimating[ix] ? "Modal disappearModal" : "Modal")}>
+                            <p>{currencyInfo.fullNames[value]}</p>
+                            <p>1 {currencyInfo.convertFrom}=={currencyInfo.rates[value]} {value}</p>
+                        </div>
                     </div>
                 </div>
              )
