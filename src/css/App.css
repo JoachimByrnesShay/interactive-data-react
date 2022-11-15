@@ -112,14 +112,6 @@
   }
 
 
-  .Header-flashContainer.isDisplayed {
-      animation: flashMessageInHeader 4500ms normal forwards;
-  animation-iteration-count: 1;
-  }
-  
-  .Header-flashContainer {
-    
-  }
   
   .Header-flashMessage {
     margin: 0 !important;
