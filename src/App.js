@@ -70,6 +70,8 @@ function App() {
                     case 'Convert':
                         FilterHandling.handleFilterDownArrow_Convert(currentIndex);
                         break;
+                    default:
+                        break;
                 }
             }
         },
@@ -164,7 +166,7 @@ function App() {
         },
         handleSelectSpecialKeyPresses_Convert: (e)=> {
             let currentIndex = e.target.selectedIndex;
-            let val = e.target.value;
+        
             if (e.keyCode === 38) {
                 (prevConvertSelectIx === 0) ? setGoToFilter({ ...goToFilter, convert: true, base: false }): setPrevConvertSelectIx(currentIndex);
             } else if (e.key === 'Enter') {
@@ -225,41 +227,42 @@ function App() {
             }
         },
         handleBaseSelectChange: (thisSelect)=> {
-            let val = thisSelect.target.value;
+           return null;
         },
         handleConvertSelectChange: (thisSelect)=> {
-            let val = thisSelect.target.value;
+            return null;
         },
     // not sure if we need to check onChange on select with the current implementation above, ok without using it so far in Firefox, check Chrome, Edge, etc browsers
     }
 
-    const ModalHandling = {
-        showOrHideModal: (e,ix)=> { 
+    const [isChartModalDisplayed, setIsChartModalDisplayed] = useState(Array(7).fill(false));
+    const [isChartModalAnimatingDisappearance, setIsChartModalAnimatingDisappearance] = useState(Array(7).fill(false));
 
-            let modalName = `modal${ix}`;
+
+    const ModalHandling = {
+        showModal: (e,ix)=> { 
+
+        
             let thisModalDisplayState;
 
-            if (isChartModalDisplayed[ix]){
-                thisModalDisplayState = false;
-            } else {
-                thisModalDisplayState = true;
-            }
-            let animating = !thisModalDisplayState;
+            thisModalDisplayState = true;
+    
+            let animating = false;
             //false newVal means no longer displaying so here we should set animation into Effect;
-            let resetIsChartModalAnimating = [...isChartModalAnimating.splice(0, ix), animating, ...isChartModalAnimating.splice(ix+1)];
+            let resetIsChartModalAnimating = [...isChartModalAnimatingDisappearance.splice(0, ix), false, ...isChartModalAnimatingDisappearance.splice(ix+1)];
            
             let newDisplaySet = [...isChartModalDisplayed.slice(0,ix),thisModalDisplayState, ...isChartModalDisplayed.slice(ix+1)];
-            setIsChartModalAnimating(resetIsChartModalAnimating);
+            setIsChartModalAnimatingDisappearance(resetIsChartModalAnimating);
             setIsChartModalDisplayed(newDisplaySet);
         },
         hideModal: (e,ix)=> {
             if (isChartModalDisplayed[ix]) {
-                let thisModalDisplayState = true;
-                let animating = !thisModalDisplayState;
-                let resetIsChartModalAnimating = [...isChartModalAnimating.splice(0, ix), animating, ...isChartModalAnimating.splice(ix+1)];
+                let thisModalDisplayState = false;
+                let animating = true;
+                let resetIsChartModalAnimating = [...isChartModalAnimatingDisappearance.splice(0, ix), animating, ...isChartModalAnimatingDisappearance.splice(ix+1)];
                
                 let newDisplaySet = [...isChartModalDisplayed.slice(0,ix),thisModalDisplayState, ...isChartModalDisplayed.slice(ix+1)];
-                setIsChartModalAnimating(resetIsChartModalAnimating);
+                setIsChartModalAnimatingDisappearance(resetIsChartModalAnimating);
                 setIsChartModalDisplayed(newDisplaySet);
             }
         }
@@ -273,8 +276,8 @@ function App() {
         convertSelectRef: useRef(null),
     }
      // modulate show or hide of modal with boolean value, ternary expression uses this in jsx build of modal attributes, i.e. related functions
-    const [isChartModalDisplayed, setIsChartModalDisplayed] = useState(Array(7).fill(false));
-    const [isChartModalAnimating, setIsChartModalAnimating] = useState(Array(7).fill(false));
+    // const [isChartModalDisplayed, setIsChartModalDisplayed] = useState(Array(7).fill(false));
+    // const [isChartModalAnimating, setIsChartModalAnimating] = useState(Array(7).fill(false));
 
     const [isFlashDisplayed, setIsFlashDisplayed] = useState(false);
 
@@ -305,14 +308,14 @@ function App() {
         convert: false,
     });
 
-    const [baseSelectValue,setBaseSelectValue] = useState('');
+    // const [baseSelectValue,setBaseSelectValue] = useState('');
 
-    const [windowWidthValue, setWindowWidthValue] = useState(null);
+    // const [windowWidthValue, setWindowWidthValue] = useState(null);
     const [prevBaseSelectIx, setPrevBaseSelectIx] = useState(-1);
     const [prevConvertSelectIx, setPrevConvertSelectIx] = useState(-1);
      
-    const [goToBaseFilter, setGoToBaseFilter] = useState(false);
-    const [goToConvertFilter, setGoToConvertFilter] = useState(false);
+    //const [goToBaseFilter, setGoToBaseFilter] = useState(false);
+    //const [goToConvertFilter, setGoToConvertFilter] = useState(false);
 
     // note 10/24--- as of the current state of the app, this below useEffect call cannot use currencyData as a dependency, it will be called too frequently
     useEffect(fetchAll, [currencySelections.convertFrom]);
@@ -448,7 +451,7 @@ function App() {
                             .map((curr, index) => (
                                 <option value={curr} key={index} 
                                     className={'Configure-baseOption'} 
-                                    onMouseEnter={()=>setBaseSelectValue(curr)}
+                                 
                                     //onMouseEnter={(e)=>{e.target.selected='selected';console.log('selected in select per option is: ', e.target.selected)}} 
                                     onClick={(e)=>SelectHandling.handleOptionClick_base(curr,e)}
                                     >
@@ -501,7 +504,7 @@ function App() {
                                     key={index} 
                                     //className={currencySelections.convertTo.includes(curr) ? 'Configure-comparisonOption is-selectedComparison' : 'Configure-comparisonOption'} 
                                     //className={'Configure-comparisonOption' + (currencySelections.convertTo.includes(curr) ? ' ' + 'is-selectedComparison' : '')}
-                                    className={`Configure-comparisonOption ${currencySelections.convertTo.includes(curr) ? ' ' + 'is-selectedComparison' : ''}`}
+                                    className={`Configure-comparisonOption ${currencySelections.convertTo.includes(curr) ? ' is-selectedComparison' : ''}`}
                                     onClick={(e)=>SelectHandling.handleOptionClick_convert(curr,e)}>
                                         {curr}: {currencyInfo.fullNames[curr]}
                                 </option>
@@ -556,8 +559,8 @@ function App() {
                     
                     <div className={`ChartContent-barChartContainer ${ix === 0 ? "is-baseChart" : ""}`} key={ix}>
                         <div style={{ [ChartsUtils.getChartsOrientation()]: String(chartInfo.size) + '%'}}
-                            onClick={(e)=>ModalHandling.showOrHideModal(e,ix)}
-                            onMouseOut={(e)=>ModalHandling.hideModal(e,ix)}
+                            onClick={(e)=>ModalHandling.showModal(e,ix)}
+                            onMouseLeave={(e)=>ModalHandling.hideModal(e,ix)}
                             className={`ChartContent-barChart`}>
                             <p 
                                 style={{
@@ -567,7 +570,8 @@ function App() {
                             </p>
                             <div         
                                 //onClick={(e)=>modalEventHandler(e,ix)} 
-                                className={isChartModalDisplayed[ix] ? "Modal isdisplayed" : (isChartModalAnimating[ix] ? "Modal disappearModal" : "Modal")}
+                                //className={isChartModalDisplayed[ix] ? "Modal isdisplayed" : (isChartModalAnimatingDisappearance[ix] ? "Modal disappearModal" : "Modal")}
+                                className={`Modal ${isChartModalDisplayed[ix] ? "isdisplayed" : (isChartModalAnimatingDisappearance[ix] ? "disappearModal" : "")}`}
                             >
                                 <p>{currencyInfo.fullNames[chartInfo.currency]}</p>
                                 <p>1 {currencySelections.convertFrom}=={currencyInfo.rates[chartInfo.currency]} {chartInfo.currency}</p>
