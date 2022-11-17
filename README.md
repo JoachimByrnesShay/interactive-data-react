@@ -6,7 +6,7 @@
 
 https://interactive-data-react.herokuapp.com/
 
-### github repositiory---  
+### github repository---  
 
 https://github.com/JoachimByrnesShay/interactive-data-react
 
@@ -22,6 +22,7 @@ Charts display proportional values from perspective of, upon exchange, how many 
 ### Credit 
 all data taken from 'https://openexchangerates.org/',
 data consists of standardized currency codes and conversion rates.
+code and styling- joachim byrnes-shay
 
 ### API Docs
 are found here: https://docs.openexchangerates.org/
