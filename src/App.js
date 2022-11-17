@@ -318,8 +318,8 @@ function App() {
         <section className="Configure">
             <div className="Configure-Base">
                 <h2 className='Configure-baseHeading'>Change your base currency from 
+                    {/* using data attrib to set a custom tooltip, displaying title of configured baseValue upon hover, using CSS.  the standard title attribute has default styling which cannot be overriden */}
                     <span className='Configure-baseHeadingValue'
-                        {// using data attrib to set a custom tooltip, displaying title of configured baseValue upon hover, using CSS.  the standard title attribute has default styling which cannot be overriden}
                         data-tooltip-title={currencyInfo.fullNames[currencySelections.convertFrom]} 
                     >
                         {currencySelections.convertFrom} 
