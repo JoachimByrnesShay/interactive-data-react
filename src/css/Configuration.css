@@ -251,7 +251,7 @@
     text-transform: uppercase;
     font-weight: 600;
     border: 3px solid black;
-    box-shadow: 10px 15px 20px gray;
+    box-shadow: 10px 20px 30px gray;
   }
   
   /* add a "press in" visual animation to clear charts button */

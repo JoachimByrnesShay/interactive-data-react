@@ -60,6 +60,8 @@ function App() {
         fullNames: {},
     });
 
+    const [animateClearChartsButton, setAnimateClearChartsButton] = useState(false);
+
     // selected API requires 2 separate URLS to get the desired data as above, one for rates, one with the full names, thus 2 fetches which are chained and nested so that ALL info is ready upon first render
     function fetchAll() {
         let baseRates = `latest.json?app_id=${FetchConstants.app_id}&base='${currencySelections.convertFrom}'`;
@@ -117,9 +119,15 @@ function App() {
         // dependant upon isSmallScreen boolean state variable which will change upon window resize listener to true (small) or false (large) the orientation value will be used in inline style of JSX
         // to change charts to horizontal (width) or vertical(height) accordingly
         getChartsOrientation: ()=> isSmallScreen ? 'width' : 'height',
-    
+        // set animate of button to true, so that animating class is added to JSX per ternary condition in JSX
+        startToClearCharts: ()=> setAnimateClearChartsButton(true),
+        // set convertTo to empty array, which will result in re-rendering the page with no comparison charts, reset animate state variable so that animating class is removed from JSX for button
+        clearCharts: ()=>{
+            setCurrencySelections({...currencySelections, convertTo: []})
+            setAnimateClearChartsButton(false);
+        },
     }
-
+  
     const FilterHandling = {
         // the value of base filter field input, used as new value in JSX upon changes
         handleBaseFilterChange: (thisFilter)=> { 
@@ -306,11 +314,12 @@ function App() {
 
 
     return (
-         // prevent default behavior of refresh of browser page when enter key is pressed in any/all input field, without this, because there are forms/inputs page will 'submit', resulting in a highly visible 
-         // and unpleasing refresh of browswer page
+        // prevent default behavior of refresh of browser page when enter key is pressed in any/all input field, without this, because there are forms/inputs page will 'submit', resulting in a highly visible 
+        // and unpleasing refresh of browser page 
         <div className="Page" onKeyDown={(e)=>e.keyCode === 13 ? e.preventDefault() : undefined}>
         <header className="Header">
         <h1 className='Header-title'>Currency Visualization</h1>
+            {/* flash warning only shows based upon value of state variable, via class setting */}
             <div className={`Header-flashContainer ${isFlashDisplayed ? "isDisplayed" : ""}`}>
                 <p className={'Header-flashMessage'}>SELECT NO MORE THAN {MaxNumOfComparisons} COMPARISONS.<br/>TO DESELECT A SELECTED CHOICE, click it.</p>
             </div>
@@ -329,8 +338,7 @@ function App() {
                     <label className='Configure-baseFilterLabel'>
                         FILTER
                         <input 
-
-                           ref={Refs.baseFilter}
+                            ref={Refs.baseFilter}
                             name='Base'
                             placeholder=''
                             id={'Configure-baseFilter'}
@@ -338,30 +346,25 @@ function App() {
                             value={baseFilterVal}
                             onKeyUp={FilterHandling.handleBaseFilterDownArrowToSelect}
                             onChange={(e)=>setBaseFilterVal(e.target.value)}
-
                         />
                     </label>
                     <select 
                         ref={Refs.baseSelect}
                         name='Base'
                         size="4"
-                         
                         className={"Configure-baseSelectBox"}
                         value={baseSelectValue}
-                    
                         onKeyUp={SelectHandling.baseSelectKeys}
-                        onChange={e=>setBaseSelectValue(e.target.value)}
-                 
-                        
-                     
+                        onChange={e=>setBaseSelectValue(e.target.value)}                     
                     >
                         {
+                            /* using map, option with text of currency abbreviation will be created for all named currencies, filtered as appropriate by input/filter value */
+                            /* value which is set on select element will change via select onChange and be set to selected option, via state */
                             Object.keys(currencyInfo.fullNames)
                             .filter(curr => curr.toLowerCase().startsWith(baseFilterVal.toLowerCase()))
                             .map((curr, index) => (
                                 <option value={curr} key={index}
                                     className={'Configure-baseOption'} 
-                                                         
                                     onClick={(e)=>{SelectHandling.handleOptionClick_base(curr,e)}}
                                     >
                                         {curr}: {currencyInfo.fullNames[curr]}
@@ -381,10 +384,9 @@ function App() {
                             ref={Refs.convertFilter}
                             name='Convert'
                             placeholder=""
-                            id='Configure-comparisonsFilter'
+                            id={'Configure-comparisonsFilter'}
                             className={'Configure-comparisonsFilter'}
                             value={convertFilterVal}
-                            onInput={(e)=>setConvertFilterVal(e.target.value)}
                             onKeyUp={FilterHandling.handleConvertFilterDownArrowToSelect}
                             onChange={(e)=>setConvertFilterVal(e.target.value)}
                         />
@@ -400,15 +402,16 @@ function App() {
                         onKeyUp={SelectHandling.convertSelectKeys}
                     >
                         {
+                            // in the case of filtering the convert/comparisons list, we omit the base currency deliberately, i.e. currencySelections.convertFrom, via the below
                             Object.keys(currencyInfo.fullNames)
                             .filter(curr => (
                                 curr.toLowerCase().startsWith(convertFilterVal.toLowerCase()) //
                                 && (curr.toLowerCase() !== currencySelections.convertFrom.toLowerCase())
                             ))
                             .map((curr, index) => (
+                                // if any option represents a currency that is a selected comparison, i.e. in the list already, it is styled especially via class setting as below
                                 <option value={curr} 
                                     key={index} 
-                                   
                                     className={`Configure-comparisonOption ${currencySelections.convertTo.includes(curr) ? ' is-selectedComparison' : ''}`}
                                     onClick={(e)=>SelectHandling.handleOptionClick_convert(curr,e)}>
                                         {curr}: {currencyInfo.fullNames[curr]}
@@ -418,13 +421,11 @@ function App() {
                     </select>
                 </form>
             </div>
-            
-
+            {/* custom tooltips are created using custom data attributes in the below showConfiguration section for both seledcted base and selected comparison values*/}
             <div className='Configure-showCurrentConfigurationContainer'>
                 <div className='Configure-showCurrentConfiguration'>
                     <div className='Configure-showBaseContainer'>
                         <h3>Base:</h3>
-                  
                         <div 
                             className='Configure-showBaseContainer'>
                             <p className='Configure-baseValue'
@@ -449,10 +450,13 @@ function App() {
                     </div>
                 </div>
             </div>
-
-
+        {/* button can clear charts by using setter on currencySelections.convertFrom to remove all elements, then re-render with no comparison charts */}
             <div className='Configure-clearChartsContainer'>
-                <button className='Configure-clearChartsButton'>
+                <button 
+                    onClick={ChartsUtils.startToClearCharts} 
+                    className={`Configure-clearChartsButton ${animateClearChartsButton ? 'Configure-clearChartsButton--pressed' : ''}`}
+                    onAnimationEnd={ChartsUtils.clearCharts}
+                >
                     Clear charts + comparisons
                 </button>
             </div>
@@ -485,11 +489,9 @@ function App() {
                     </div>
                 ))
             }
-    
         </main>
         <footer className="Footer">&copy; 2022 Joachim Byrnes-Shay</footer>
     </div>)
-  
 }
 
 export default App;
