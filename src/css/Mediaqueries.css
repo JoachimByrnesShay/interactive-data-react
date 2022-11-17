@@ -23,13 +23,22 @@
     padding-top: 0;
     height: 90%;
   }
+ 
 
-  .ChartContent-indicateBase {/* on small screen, display of "base currency" indicator text for base currency chart displays horizontally, changed from vertical */
-    top: 30%;
-    left: 60%;
-    writing-mode: horizontal-tb;
+  .ChartContent-barChartContainer.is-baseChart::after {
+    content: "BASE CURRENCY";
     text-orientation: mixed;
+    position: absolute;
+    
+    top: 35%;
+    left: 35%;
+    writing-mode: horizontal-tb;
+   
+    display: inline-block;
+    margin: 0 auto;
+    text-shadow:3px 3px 3px orange;
   }
+
 
   .Modal {/*modal is absolutely positioned to ChartContent-container, whose height and width have been changed on small screens*/
     top: 0;
