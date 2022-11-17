@@ -1,17 +1,16 @@
-.Configure * {
+  
+  .Configure * {
     font-size: 1em;
   }
   
   /* configuration section */
   
   .Configure {
-
     font-size: 1em;
     background-image: var(--Configure-linearGradientBackground);
-  
     color: black;
     display: grid;
-    grid-template-columns: repeat(auto-fill,minmax(20em,1fr));
+    grid-template-columns: repeat(auto-fill, minmax(20em,1fr));
     justify-content: space-between;
     align-content: start;
     padding-bottom: 1em;
@@ -49,7 +48,6 @@
     border-radius: 5px;
     overflow-y: scroll;
     scroll-behavior: smooth;
-   
     width: 90%;
     justify-self: center;
     list-style-type: none;
@@ -59,8 +57,6 @@
     text-shadow: 1px 1px 1px grey;
   }
 
- 
-  
   /* select box options */
   
   .Configure-comparisonOption, .Configure-baseOption {
@@ -107,7 +103,6 @@
   }
   
   /* the display of currently selected base and comparison currencies in the show configuration areas */
-  
   .Configure-comparisonValue, .Configure-baseValue, .Configure-baseHeadingValue {
     background: linear-gradient(-40deg, grey 0%, black 70%);
     align-self: baseline;
@@ -123,14 +118,6 @@
     padding: 2px;
   }
   
-  /* buttons for scrolling to top of selectbox lists */
-  
-  .Configure-baseListScrollTopIntoView,
-  .Configure-comparisonsListScrollTopIntoView {
-    background: lightsalmon;
-    font-size: .8em;
-    text-transform: uppercase;
-  }
   
   /* display of currently selected base currency in base configuration section heading */
   
@@ -184,23 +171,13 @@
     border-radius: 3px;
     padding:0;
   }
-  
-  /* apply this animation to draw users attention to current configurations when these classes added */
-  
-  .Configure-baseHeadingValueAnimate, .Configure-showCurrentConfigurationAnimate p {
-    animation: alertToCurrentConfiguration 3500ms ease-out forwards;
-    animation-iteration-count: 1;
-  }
-  
+
   .Configure-showCurrentConfiguration {
     display: flex;
     align-self: center;
     justify-content: space-around;
     width: 19em;
     margin: 0;
-   
-
-
   }
 
   .Configure-showCurrentConfigurationContainer, .Configure-clearChartsContainer {
@@ -216,28 +193,9 @@
     justify-content: space-between;
   }
   
-
-  .Configure-showBaseContainer, .Configure-showComparisonsContainer {
-   
-  }
-
-  .Configure-showComparisonsContainer {
-    background-color:hsl(160,79%,85%);
-    padding:.5em;
-  }
   .Configure-showBaseContainer {
-     
-     background-color:hsl(110,29%,95%);
-     padding:.5em;
-     background-image: repeating-linear-gradient(
-    45deg,
-    transparent,
-    transparent 1px,
-    /* #90a4ae 1px,
-    #90a4ae 2px */
-    beige 1px,
-    lightsalmon 2px
-  );
+     background:lightgrey;
+     padding-right:1em;
 
   }
   
@@ -255,7 +213,6 @@
   }
   
   /* add a "press in" visual animation to clear charts button */
-  
   .Configure-clearChartsButton--pressed {
     animation: pressInClearButton 200ms ease-out 0ms;
     animation-iteration-count: 1;

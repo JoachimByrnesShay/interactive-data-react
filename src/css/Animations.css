@@ -14,112 +14,18 @@
   
   /* visual button press effect for clear charts button */
   
-  @keyframes pressInClearButton {
-    0% {
-      box-shadow: 15px 15px 20px gray;
-    }
-  
-    90% {
-      box-shadow: 1px 1px 1px grey;
-      display: none;
-    }
-  
-    100% {
-      box-shadow: 15px 15px 20px gray;
-      display: block;
-    }
+@keyframes pressInClearButton {
+  0% {
+    box-shadow: 15px 15px 20px gray;
   }
-  
-  /* controls displayed flash message when user tries to select a 6th comparison currency */
-  
-  @keyframes flashMessageInHeader {
-    0% {
-      display: flex;
-      background: var(--Header-flashMessageColor);
-    }
-  
-    80% {
-      opacity: 1;
-    }
-  
-    100% {
-      background: var(--Header-flashMessageColor);
-      opacity: 0;
-    }
+
+  90% {
+    box-shadow: 1px 1px 1px grey;
+    display: none;
   }
-  
-  /* rotate modal while shrinking it and throwing a small shadow, used on mouse-off after clicking bar to make modal appear */
-  
-  @keyframes disappearModal {
-    0% {
-      box-shadow: 5px 5px 5px grey;
-      display: flex;
-    }
-  
-    100% {
-      transform: rotate(380deg);
-      height: 7%;
-      width: 4%;
-      font-size: 3px;
-      box-shadow: 15px 15px 15px black;
-      display:none;
-    }
+
+  100% {
+    box-shadow: 15px 15px 20px gray;
+    display: block;
   }
-  
-  /* call users attention to initial or result of changes in user configuration status- i.e. selected base and selected comparison currencies
-  due to issues transitioning gradients using keyframes, there is a shift to solid backgrounds between gradient settings for a more pleasing transition experience */
-  
-  @keyframes alertToCurrentConfiguration {
-    0% {
-      background: linear-gradient(-40deg, grey 0%, black 70%);
-    }
-  
-    1% {
-      background: linear-gradient(-40deg, grey 0%, black 50%);
-    }
-  
-    2% {
-      background: linear-gradient(-40deg, grey 0%, black 30%);
-    }
-  
-    3% {
-      background: linear-gradient(-40deg, grey 0%, black 20%);
-    }
-  
-    4% {
-      background: linear-gradient(-40deg, grey 0%, black 10%);
-    }
-  
-    5% {
-      background: black;
-    }
-  
-    15% {
-      background: red;
-    }
-  
-    75% {
-      background: red;
-    }
-  
-    95% {
-      background: rgb(30,30,30);
-    }
-  
-    96% {
-      background: linear-gradient(-40deg, rgb(30,30,30) 50%, grey 95%);
-    }
-  
-    97% {
-      background: linear-gradient(-40deg, rgb(30,30,30) 60%, grey 100%);
-    }
-  
-    97% {
-      background: linear-gradient(-40deg, rgb(30,30,30) 65%, grey 100%);
-    }
-  
-    99% {
-      background: linear-gradient(-40deg, black 70%, grey 100%);
-    }
-  }
-  
+}

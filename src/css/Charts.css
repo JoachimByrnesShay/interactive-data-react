@@ -1,6 +1,6 @@
+
 .ChartContent {
     background: #ebf5f9;
-    /* intended background for .CharContent */
     background-image: var(--ChartContent-linearGradientBackground);
     display: flex;
     position: relative;
@@ -17,8 +17,7 @@
     user-select: none;
   }
 
-  .ChartContent-chartsContainer {
-    
+  .ChartContent-chartsContainer { 
     display: flex;
     justify-content: space-between;
     align-items: flex-end;
@@ -30,27 +29,29 @@
   .ChartContent-barChartContainer.is-baseChart {
     background: var(--ChartContent-barChartContainer--is-baseChartColor);
   }
+
+  /* clear all charts other than base currency chart when the --clearCharts class is added */
+
+  .ChartContent--clearCharts .ChartContent-barChartContainer:not(.is-baseChart) {
+    animation: clearCharts 2s normal forwards;
+    animation-iteration-count: 1;
+  }
+
+  /* style ::after container which displays the "base currency" label for the chart which represents the base currency */
   .ChartContent-barChartContainer.is-baseChart::after {
+    color:black;
+    font-weight:bold;
     content: "BASE CURRENCY";
     text-orientation: vertical;
     position: absolute;
-    
     top: 5em;
-    left: 0%;
+    left: 7%;
     writing-mode: vertical-rl;
     text-orientation: upright;
     display: inline-block;
     margin: 0 auto;
-    text-shadow:3px 3px 3px orange;
-  }
+   }
 
- 
-  .ChartContent-barChartContainer {
-    position: relative;
-    display: flex;
-    /* text "selectability on" changes cursor to select cursor in UI on mouseover or drag.  set user-select to none so selectability is off, no cursor change when user drags or mouseover on chart text */
-    user-select: none;
-  }
 
   .ChartContent-barChartContainer:nth-of-type(even) .ChartContent-barChart {
     background: var(--ChartContent-barChart--even-backgroundColor);
@@ -62,16 +63,14 @@
   }
   .ChartContent-barChartTitle {
     font-weight: bold;
-     font-family: Arial;
+    font-family: Arial;
   }
   
   .ChartContent-barChartTitle.u-offset {
     position: absolute;
     color: black;
-    
   }
   
-
   .ChartContent-barChart {
     font-weight: 800;
     width: 7em;
@@ -89,27 +88,9 @@
   }
   
 
-  /* .ChartContent-barChart:not(:hover) .Modal {
-    animation: disappearModal 800ms normal forwards;
-    animation-iteration-count: 1;
-  } */
-  
-  .Modal.disappearModal {
-    position:absolute;
-    visibility:visible;
-    height:0%;
-    font-size:0;
-    transform:rotate(380deg);
-    transition-property: height, transform, font-size;
-    transition-duration: 900ms;
-     
-
-  } 
 
   .Modal {
     color: var(--Modal-textColor);
-     
-     
     visibility:hidden;
     background-color: var(--Modal-backgroundColor);
     border-radius: .6em;
@@ -124,7 +105,6 @@
     height: 110px;
     box-shadow: 2px 3px 1px var(--Page-boxShadowColor);
     z-index: 20;
-   
   }
   
   /* state of modal = display */
@@ -133,7 +113,7 @@
   
   .Modal.isdisplayed {
     display: flex;
-     visibility:visible;
+    visibility:visible;
     position: absolute;
     flex-direction: column;
     justify-content: center;
@@ -141,16 +121,14 @@
     opacity:1;
   }
 
-  /* style container which displays the "base currency" label for the chart which represents the base currency */
+  /* using css transformation to animate the disapparance of modal as appropriate */
+  .Modal.disappearModal {
+    position:absolute;
+    visibility:visible;
+    height:0%;
+    font-size:0;
+    transform:rotate(380deg);
+    transition-property: height, transform, font-size;
+    transition-duration: 900ms;
+  } 
 
-.ChartContent-indicateBase {
-  position: absolute;
-  color: transparent;
-  top: 5em;
-  left: 60%;
-  writing-mode: vertical-rl;
-  text-orientation: upright;
-  display: inline-block;
-  margin: 0 auto;
-  text-shadow: 3px 5px 3px black;
-}

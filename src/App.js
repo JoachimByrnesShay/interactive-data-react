@@ -60,7 +60,9 @@ function App() {
         fullNames: {},
     });
 
+    // state variables for setting classes in JSX which trigger animation of button when pressed to clear charts, and to animate the disappearance of the clearing of all comparison charts
     const [animateClearChartsButton, setAnimateClearChartsButton] = useState(false);
+    const [animateClearChartsComparisons, setAnimateClearChartsComparisons] = useState(false);
 
     // selected API requires 2 separate URLS to get the desired data as above, one for rates, one with the full names, thus 2 fetches which are chained and nested so that ALL info is ready upon first render
     function fetchAll() {
@@ -120,12 +122,19 @@ function App() {
         // to change charts to horizontal (width) or vertical(height) accordingly
         getChartsOrientation: ()=> isSmallScreen ? 'width' : 'height',
         // set animate of button to true, so that animating class is added to JSX per ternary condition in JSX
-        startToClearCharts: ()=> setAnimateClearChartsButton(true),
-        // set convertTo to empty array, which will result in re-rendering the page with no comparison charts, reset animate state variable so that animating class is removed from JSX for button
+        animateClearChartsButton: ()=> setAnimateClearChartsButton(true),
+        // reset animate state variable so that animating class is removed from JSX for button
+        // set animateClearChartsComparisons to true, which will add appropriate animated class to .ChartContent (main element)
         clearCharts: ()=>{
-            setCurrencySelections({...currencySelections, convertTo: []})
             setAnimateClearChartsButton(false);
+            setAnimateClearChartsComparisons(true);
         },
+        // set the last animation variable in the charts clearing process which controlls presence of JSX class to false
+        // set convertTo to empty array, which will result in re-rendering the page with no comparisons listed in configuration section and no comparisons charts, 
+        finishClearingCharts: ()=>{
+            setAnimateClearChartsComparisons(false);
+            setCurrencySelections({...currencySelections, convertTo: []})
+        }
     }
   
     const FilterHandling = {
@@ -292,6 +301,7 @@ function App() {
     // call fetch on first render and whenever currencySelections.convertFrom changes (the base currency), as the rates to be retrieved from API for all currencies are relative to the base currency, and therefore will change
     useEffect(fetchAll, [currencySelections.convertFrom]);
 
+
     // listen on window for resize.  at less than 950 innerwidth, isSmallScreen will be set to true.  This will be used in JSX in conjunction with ChartsUtils.getChartsOrientation to change the dimension of graph 
     // section to horizontal or vertical depending on the value of isSmallScreen, oonditionally using inline css 'width' or 'height' but not both, along with calculated size of graph element
     useEffect(() => {
@@ -453,7 +463,7 @@ function App() {
         {/* button can clear charts by using setter on currencySelections.convertFrom to remove all elements, then re-render with no comparison charts */}
             <div className='Configure-clearChartsContainer'>
                 <button 
-                    onClick={ChartsUtils.startToClearCharts} 
+                    onClick={ChartsUtils.animateClearChartsButton} 
                     className={`Configure-clearChartsButton ${animateClearChartsButton ? 'Configure-clearChartsButton--pressed' : ''}`}
                     onAnimationEnd={ChartsUtils.clearCharts}
                 >
@@ -461,8 +471,8 @@ function App() {
                 </button>
             </div>
         </section>
-        
-        <main className="ChartContent">
+        {/* the class added by the below ternary condition animates the disappearance of all comparison charts */}
+        <main onAnimationEnd={ChartsUtils.finishClearingCharts} className={`ChartContent ${animateClearChartsComparisons ? 'ChartContent--clearCharts' : ''}`}>
             {
                 /* with respect to code in the below mapping, chartInfo assigns to an object on each iteration consiting of 2 key/values, chartInfo.currency and chartInfo.size.   
                     already calculating size saves from what would otherwise be duplicated calculations in the below code */

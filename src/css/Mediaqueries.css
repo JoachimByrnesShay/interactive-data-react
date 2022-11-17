@@ -1,5 +1,5 @@
 @media only screen and (max-width: 950px) {
-  .ChartContent {/*change orientetion of .ChartContent flex items on smaller screens, i.e. vertical to horizontal barCharts */
+  .ChartContent {/*change orientation of .ChartContent flex items on smaller screens, i.e. vertical to horizontal barCharts */
     flex-direction: column;
     justify-content: space-around;
   }
@@ -27,6 +27,8 @@
 
   .ChartContent-barChartContainer.is-baseChart::after {
     content: "BASE CURRENCY";
+    color:black;
+    font-weight:bold;
     text-orientation: mixed;
     position: absolute;
     
@@ -36,7 +38,7 @@
    
     display: inline-block;
     margin: 0 auto;
-    text-shadow:3px 3px 3px orange;
+    text-shadow:1px 1px 3px white;
   }
 
 

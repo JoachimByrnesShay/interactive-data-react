@@ -8,8 +8,6 @@
     box-sizing: border-box;
   }
   
-
-    
   :root {/*CSS variables for element background, border, default boxShadow colors */
     --Page-backgroundColor: #cddeee;
     --Header-backgroundColor: #38598b;
@@ -34,8 +32,6 @@
     --Modal-textColor: white;
   }
     
-  
-  
   .Page {
     width: 100vw;
     height: 100vh;
@@ -47,7 +43,6 @@
     grid-template-rows: 3fr 5fr 40fr 1fr;
     font-family: 'Nunito', sans-serif;
     font-weight: 400;
-  
   }
   
   .Header {
@@ -82,13 +77,11 @@
     margin-left: 5%;
   }
   
-
   .Header-flashContainer {
     color: var(--Header-flashContainer-textColor);
     text-shadow: 2px 3px 6px black;
     font-weight: bold;
     padding: 0;
-   
     display: grid;
     grid-template-rows: 1fr;
     grid-template-columns: 1fr;
@@ -103,34 +96,24 @@
    
   }
 
+   /* flash message when user tries to select more than the maximum allowable comparison currencies, a value which is configured by a constant in App.js */
   .Header-flashContainer.isDisplayed {
     visibility: visible;
     opacity: 1;
     transition: opacity 0s linear;
     background: var(--Header-flashMessageColor);
-    
+      
   }
 
-
-  
   .Header-flashMessage {
     margin: 0 !important;
     padding: 0 !important;
     background: var(--Header-flashMessageColor) !important;
   }
-  
-  /* flash message when user tries to select a 6th comparison currency */
-  
-  /* .Header-flashMessage.Header-flashContainer {
-    animation: flashMessageInHeader 4500ms normal forwards;
-    animation-iteration-count: 1;
-  } */
 
-
-
-.Footer {
-  padding-left: .5em;
-  background: var(--Footer-backgroundColor);
-  display: flex;
-  color: var(--Footer-textColor);
-}
+  .Footer {
+    padding-left: .5em;
+    background: var(--Footer-backgroundColor);
+    display: flex;
+    color: var(--Footer-textColor);
+  }
