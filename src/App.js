@@ -1,14 +1,5 @@
 import { useState, useEffect, useRef } from 'react';
 
-// ! THINGS TO DO 
-// ! evaluate need to split up currencyData state object into smaller state objects,
-//  ! and see if this impacts Fetch in useEffect
-// ! reevaluate my need for keeping track of indices for focus control re select boxes vs filter field
-// ! reevaluate the need for gotofilter and focusinselect and their implementation
-// ! reevaluate the usage of useEffect and implementation
-// ! reevaluate how many times I am calling setCurrecyData and where
-// ! rename functions and variables appropriately, evaluate 
-
 
 // url and app_id for exchangerates provider, to be utilized in fetchAll method.
 const FetchConstants = {
@@ -161,125 +152,123 @@ function App() {
 
     const SelectHandling = {
  
-        // handleUpEnter_Base: (optionVal,e)=> {
-        //     // if up arrow pressed and at first index of list already, restore focus to filter field
-        //     // this allows a smooth user experience of if using up arrow to scroll upward through select list,
-        //     // user "pops" into filter field after scrolling up past option 0
-        //      setCurrencySelections({ ...currencySelections, convertFrom: optionVal })
-
-        // },
-      
-
-
+        // used as onKeyUp listener on select element for base currency selection, offers control of behavior upon 'enter' press on option (child of select) 
+        // as well as upon upArrow when option at index 0 is currently selected with resulting functionality in latter case of navigating up into base filter input field
         baseSelectKeys: (e)=>{
-           
             let ix = e.target.selectedIndex;
 
             // on Enter key pressed on option in select element, the convertFrom currency will be changed ot the new value, i.e. of option selected upon enter pressed
             if(e.key === 'Enter') {
                  setCurrencySelections({ ...currencySelections, convertFrom: e.target.value })
             } 
-            // if the previous recorded base index value is the first option and the upArrow is pressed, go up into the base filter field
+            // if the previous recorded baseSelect-index value representes the first option (ix 0) and the upArrow is pressed, move up into the base filter field
             if(prevBaseIndex === 0 && e.keyCode === 38){
                 setBaseSelectValue(undefined);
                 Refs.baseSelect.current.selectedIndex = -1;
                 Refs.baseFilter.current.focus();
 
             } 
-            // otherwise either down arrow or another key has been pressed, default behavior of down arrow is to continue to traverse downward through the options one by one
-            // default behavior of other alpha keys IF the filter field is blank will be to navigate to the next option whose value starts with the letter pressed
-            // set a new previous index value in all cases
+            // otherwise either downArrow or another key has been pressed, default behavior of down arrow is to continue to traverse downward through the options one by one.
+            // default behavior of other alpha keys IF the filter field is blank will be to navigate to the next option whose value starts with the letter pressed, otherwise constrained by filter population
+            // update prevBaseIndex in all cases. as implemented, since this method as a sole onKeyUp listener is branching between 2 special cases, the above conditional
+            // being dependant upon the prevIndex ensures that we navigate upon the sequence of call to listener-> hear move to ix 0 via index 1 with upArrow, call to listener again (a separate occuccrence) -> hear upArrow from index 0, 
+            // rather than be dependant upon e.target.selectedIndex && e.keyCode == 38 as the conditional, 
+            // which would not provide the desired control for it would have the effect of jumping into filter field in one listen when moving from -1 to 0, i.e., when moving up the list, the user will never sit on index 0 in that case
             setPrevBaseIndex(ix);
         },
+        // similar functionality to baseSelectKeys offered for the conversion currencies select list, with additional complexity of that the comparisons list allows for selecting an array of size up to MaxNumOfComparisons,
+        // and not only one value.  This array is the value of the state variable currencySelections.convertTo.  "enter" key on comparison/conversion currency option is a selection funcationality which 
+        // will either add the selected currency to the selected comparisons which will be displayed as charts vs the selected base currency, or will remove the currency from the conversions list if it 
+        // is already present in the list, or will result in displaying a flash warning message if no further comparison currencies can be added unless one or more are deselected due to being at max size for the convertTo array
         convertSelectKeys: (e)=> {
-         let ix = e.target.selectedIndex;
-         let val = e.target.value;
-         if (prevConvertIndex === 0 && e.keyCode === 38) {
-            setConvertSelectValue(undefined);
-            Refs.convertSelect.current.selectedIndex = -1;
-            Refs.convertFilter.current.focus();
+            let ix = e.target.selectedIndex;
 
-         } else if (e.key === 'Enter') {
-             let newArr;
-             let val = Refs.convertSelect.current.options[Refs.convertSelect.current.selectedIndex].value;
-             if (currencySelections.convertTo.includes(val)) {
-                 let ix = currencySelections.convertTo.indexOf(val);
-                 let leftArr = currencySelections.convertTo.slice(0, ix);
-                 let rightArr = currencySelections.convertTo.slice(ix + 1);
-                 newArr = [...leftArr, ...rightArr];
-             } else if (currencySelections.convertTo.length >= MaxNumOfComparisons){
-                setIsFlashDisplayed(true);
-                return;
-             }  else {
-                 newArr = [...currencySelections.convertTo, val]
-             }
-             newArr = GenUtils.alphabetizeStringArr(newArr);
-             setCurrencySelections({ ...currencySelections, convertTo: newArr})
-         }
-         setPrevConvertIndex(ix);
-     },
+            let val = e.target.value;
+            // using same methodology as in baseSelectKeys of employing the conversion/comparisons list selected idnex from the last render to modulate the behavior
+            if (prevConvertIndex === 0 && e.keyCode === 38) {
+                setConvertSelectValue(undefined);
+                Refs.convertSelect.current.selectedIndex = -1;
+                Refs.convertFilter.current.focus();
+            } else if (e.key === 'Enter') {
+                let newArr;
+                // if the selected currency is already in currencySelections.convertTo, it will be removed by slicing (returning copies) the array around the index of current selection, combining, 
+                // using as the updated value via the state setter for currencySelections 
+                if (currencySelections.convertTo.includes(val)) {
+                    let ixInSelections = currencySelections.convertTo.indexOf(val);
+                    let leftArr = currencySelections.convertTo.slice(0, ixInSelections);
+                    let rightArr = currencySelections.convertTo.slice(ixInSelections + 1);
+                    newArr = [...leftArr, ...rightArr];
+                // flash if exceeds allowable num of selections
+                } else if (currencySelections.convertTo.length >= MaxNumOfComparisons) {
+                    setIsFlashDisplayed(true);
+                    return;
+                } else {
+                    newArr = [...currencySelections.convertTo, val]
+                    // the above may need to be alphabetized in order that it appears in an organized fashion in the configuration display of comparison currencies in the top right
+                    newArr = GenUtils.alphabetizeStringArr(newArr);
+                }
+             
+                setCurrencySelections({ ...currencySelections, convertTo: newArr})
+            }
+            // store the current index as the "previous" index for the next call
+            setPrevConvertIndex(ix);
+        },
+        // in addition to selection of currency functionality upon pressing 'Enter' key, it is desirable to have the same functionality upon mouse double-click
+        // in the case of base select, as with 'enter', double click with mouse will select a new base currency
         handleOptionClick_base: (optionVal, e)=> {
-            // console.log(e.target.textContent);
-            // if double-left click on an option, we want to use selection of this option to set a new convertFrom value (i.e. e.detail val is the consecutive num of left clicks)
-            // design decision--- on double click, but NOT on single click, which potentially may be employed by user as part of the navigation process without other intentions
-
-            //cannot currently do the below because it sets the selected index to 0 which is incorrect if clicking into the option directly via mouseover from another element/location on the page.
-        
-            
+            // double click, provide new value for currencySelections state variable using setter
             if (e.detail >= 2) {
                 setCurrencySelections({ ...currencySelections, convertFrom: optionVal })
             }
         },
+        // same as above, again with additional complexity due to we may select multiple items with conversion/comparisons list and we need to be able to slice and remove if 
+        // currency selected and then double clicked is already present in the currency comparisions list, then update 
         handleOptionClick_convert(optionVal, e) {
           
-          
             if (e.detail >= 2) {
-                console.log('2 in handleOptionClick_convert');
                 let newArr;
                 let val = optionVal;
                 
                 if (currencySelections.convertTo.includes(val)) {
+
                     let ix = currencySelections.convertTo.indexOf(val);
-                    console.log(ix);
                     let leftArr = currencySelections.convertTo.slice(0, ix);
                     let rightArr = currencySelections.convertTo.slice(ix + 1);
                     newArr = [...leftArr, ...rightArr];
                 } else if (currencySelections.convertTo.length >= MaxNumOfComparisons) {
+
                     setIsFlashDisplayed(true);
-                return; 
+                    return; 
                 } else {
+
                     newArr = [...currencySelections.convertTo, val];
                 }
                 newArr = GenUtils.alphabetizeStringArr(newArr);
-                console.log('newArr in handleoptionclick is :', newArr);
                 setCurrencySelections({ ...currencySelections, convertTo: newArr})
             }
         },
-        handleBaseSelectChange: (thisSelect)=> {
-           return null;
-        },
-        handleConvertSelectChange: (thisSelect)=> {
-            return null;
-        },
-    // not sure if we need to check onChange on select with the current implementation above, ok without using it so far in Firefox, check Chrome, Edge, etc browsers
     }
 
-
-
     const ModalHandling = {
+        // use state variables which correspond via indices to each modal to store boolean values.  These determine the setting (or not) of classes within the JSX for the modal which determine the UI experience of modal
+        // in the JSX, technically the index comes from map function returning containers (divs) with modal as grandchildren (divs with p siblings), thus the modal index is really a unit index for a composite construction of div > div > (p + div), in the map context
         showModal: (e,ix)=> { 
-
             let thisModalDisplay = true;
     
-            //false newVal means no longer displaying so here we should set animation into Effect;
+            // insert a falsey value into isChartModalAnimating, as we are showing it not hiding it (no animation on show)
             let resetIsChartModalAnimating = [...isChartModalAnimatingDisappearance.splice(0, ix), !thisModalDisplay, ...isChartModalAnimatingDisappearance.splice(ix+1)];
            
-            let newDisplaySet = [...isChartModalDisplayed.slice(0,ix),thisModalDisplay,...isChartModalDisplayed.slice(ix+1)];
+            // represent the current modal display, by inserting a truthy value at the appropriate index.  There will always be only one modal showing at a time as any modal disappears on mouseleave of its container
+            let newDisplaySet = [...isChartModalDisplayed.slice(0,ix), thisModalDisplay,...isChartModalDisplayed.slice(ix+1)];
             setIsChartModalAnimatingDisappearance(resetIsChartModalAnimating);
             setIsChartModalDisplayed(newDisplaySet);
         },
         hideModal: (e,ix)=> {
             if (isChartModalDisplayed[ix]) {
+                // if we hideModal, we mark modal as no display but is animating, ie. the only animation is the disappearance of the mdoal
+                // we use the isChartModalDisplayed and isChartModalAnimatingDisappearance state variables which are arrays of a size == to the max num of comparisions + 1, as the base currency will also be displayed 
+                // as a chart to the left of all comparisons.   For each given modal element, the value of isChartModal... and isChartModalAnim... at the ix equal to the corresponding modals ix 
+                // determines whether certain classes are set on the JSX for that modal and its container.
                 let thisModalDisplayState = false;
                 let animating = true;
                 let resetIsChartModalAnimating = [...isChartModalAnimatingDisappearance.splice(0, ix), animating, ...isChartModalAnimatingDisappearance.splice(ix+1)];
@@ -290,26 +279,13 @@ function App() {
             }
         }
     }
-     // references are utilized for the purpose of managing focus of filters (text input) and the related select boxes only
-     // programmatic management necessary due to the implemented feature-set
-
-     // modulate show or hide of modal with boolean value, ternary expression uses this in jsx build of modal attributes, i.e. related functions
- 
 
 
- 
-
-
-
-    // note 10/24--- as of the current state of the app, this below useEffect call cannot use currencyData as a dependency, it will be called too frequently
+    // call fetch on first render and whenever currencySelections.convertFrom changes (the base currency), as the rates to be retrieved from API for all currencies are relative to the base currency, and therefore will change
     useEffect(fetchAll, [currencySelections.convertFrom]);
-    // useEffect(()=>alphabetizeComparisons, [currencySelections]);
 
-     
-   
-
-    
-
+    // listen on window for resize.  at less than 950 innerwidth, isSmallScreen will be set to true.  This will be used in JSX in conjunction with ChartsUtils.getChartsOrientation to change the dimension of graph 
+    // section to horizontal or vertical depending on the value of isSmallScreen, oonditionally using inline css 'width' or 'height' but not both, along with calculated size of graph element
     useEffect(() => {
         window.addEventListener('resize', handleWindowWidth);
         function handleWindowWidth() {   
@@ -322,18 +298,16 @@ function App() {
         handleWindowWidth();
     },[]);
 
-    // clean this up, define functions for these, comb and weed unnecessary code
 
+    // by controlling the UI with value of state variable, allow a fadeout effect of flash warning (shown when user tries to exceed max num of allowable selections of comparison currencies)
     useEffect(() => {if (isFlashDisplayed){
       setTimeout(()=>{setIsFlashDisplayed(false)}, 2000);
     }}, [isFlashDisplayed]);
 
 
-    
-
-     // APP METHODS are temporarily defined below the return block for development purposes
     return (
-         // prevent default behavior of refresh of browser page when enter key is pressed in any/all input field
+         // prevent default behavior of refresh of browser page when enter key is pressed in any/all input field, without this, because there are forms/inputs page will 'submit', resulting in a highly visible 
+         // and unpleasing refresh of browswer page
         <div className="Page" onKeyDown={(e)=>e.keyCode === 13 ? e.preventDefault() : undefined}>
         <header className="Header">
         <h1 className='Header-title'>Currency Visualization</h1>
@@ -345,7 +319,8 @@ function App() {
             <div className="Configure-Base">
                 <h2 className='Configure-baseHeading'>Change your base currency from 
                     <span className='Configure-baseHeadingValue'
-                          data-tooltip-title={currencyInfo.fullNames[currencySelections.convertFrom]} 
+                        {// using data attrib to set a custom tooltip, displaying title of configured baseValue upon hover, using CSS.  the standard title attribute has default styling which cannot be overriden}
+                        data-tooltip-title={currencyInfo.fullNames[currencySelections.convertFrom]} 
                     >
                         {currencySelections.convertFrom} 
                     </span>
