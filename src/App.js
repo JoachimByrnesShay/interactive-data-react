@@ -14,6 +14,8 @@ const FetchConstants = {
      app_id: '0f6288f8f4b4421ba1a18cf74a5b9dcf'
 }
 
+const MaxNumOfComparisons = 7;
+
 function App() {
     const Refs = {
         baseFilter: useRef(null),
@@ -22,14 +24,13 @@ function App() {
         convertSelect: useRef(null),
     }
   
-    const [baseSelectFocus, setBaseSelectFocus] = useState(false);
-    const [baseFilterFocus, setBaseFilterFocus] = useState(false);
     const [prevBaseIndex, setPrevBaseIndex] = useState(-1);
     const [prevConvertIndex, setPrevConvertIndex] =useState(-1);
-    const [isChartModalDisplayed, setIsChartModalDisplayed] = useState(Array(7).fill(false));
-    const [isChartModalAnimatingDisappearance, setIsChartModalAnimatingDisappearance] = useState(Array(7).fill(false));
+    const [isChartModalDisplayed, setIsChartModalDisplayed] =useState(Array(MaxNumOfComparisons+1).fill(false));
+    const [isChartModalAnimatingDisappearance, setIsChartModalAnimatingDisappearance] = useState(Array(MaxNumOfComparisons+1).fill(false));
 
     const [baseSelectValue,setBaseSelectValue] = useState(undefined);
+    const [convertSelectValue,setConvertSelectValue] = useState(undefined);
 
     const [isFlashDisplayed, setIsFlashDisplayed] = useState(false);
 
@@ -106,16 +107,23 @@ function App() {
             setConvertFilterVal(val);
         },
 
-        handleBaseFilterToSelect(e) {
-        if (e.keyCode === 40){
-            console.log("should go to select");
-            //alert('ya')
-            // setBaseSelectFocus(true);
-            // setBaseFilterFocus(false);
-            Refs.baseSelect.current.focus();
-            Refs.baseSelect.current.selectedIndex = 0;
+        handleBaseFilterDownArrowToSelect(e) {
+            if (e.keyCode === 40){
+                console.log("should go to select");
+                Refs.baseSelect.current.focus();
+                /// manually set index because otherwise the select element is focused but index is undefined at first,
+                // requiring 2 down arrow key hits to get to index 0 instead of 1.
+                Refs.baseSelect.current.selectedIndex = 0;
+            }
+        },
+        handleConvertFilterDownArrowToSelect(e) {
+            if(e.keyCode === 40) {
+                console.log("should go to select");
+                Refs.convertSelect.current.focus();
+                Refs.convertSelect.current.selectedIndex = 0;
+            }
         }
-    }
+    
     }
 
     const SelectHandling = {
@@ -130,29 +138,52 @@ function App() {
       
 
 
-        baseSelectOnKey: (e)=>{
-
-            //e.target.focus();
-            //e.target.scrollIntoView();
-            setBaseSelectValue(e.target.value)
+        baseSelectKeys: (e)=>{
+           
             let ix = e.target.selectedIndex;
+
+            // on Enter key pressed on option in select element, the convertFrom currency will be changed ot the new value, i.e. of option selected upon enter pressed
             if(e.key === 'Enter') {
                  setCurrencySelections({ ...currencySelections, convertFrom: e.target.value })
             } 
+            // if the previous recorded base index value is the first option and the upArrow is pressed, go up into the base filter field
             if(prevBaseIndex === 0 && e.keyCode === 38){
-                setBaseFilterFocus(true);
                 setBaseSelectValue(undefined);
                 Refs.baseSelect.current.selectedIndex = -1;
                 Refs.baseFilter.current.focus();
 
-            } else if (baseFilterFocus){
-                setBaseFilterFocus(false);
-            }
-            
-                
+            } 
+            // otherwise either down arrow or another key has been pressed, default behavior of down arrow is to continue to traverse downward through the options one by one
+            // default behavior of other alpha keys IF the filter field is blank will be to navigate to the next option whose value starts with the letter pressed
+            // set a new previous index value in all cases
             setPrevBaseIndex(ix);
-            
         },
+        convertSelectKeys: (e)=> {
+         let ix = e.target.selectedIndex;
+         let val = e.target.value;
+         if (prevConvertIndex === 0 && e.keyCode === 38) {
+            setConvertSelectValue(undefined);
+            Refs.convertSelect.current.selectedIndex = -1;
+            Refs.convertFilter.current.focus();
+
+         } else if (e.key === 'Enter') {
+             let newArr;
+             let val = Refs.convertSelect.current.options[Refs.convertSelect.current.selectedIndex].value;
+             if (currencySelections.convertTo.includes(val)) {
+                 let ix = currencySelections.convertTo.indexOf(val);
+                 let leftArr = currencySelections.convertTo.slice(0, ix);
+                 let rightArr = currencySelections.convertTo.slice(ix + 1);
+                 newArr = [...leftArr, ...rightArr];
+             } else if (currencySelections.convertTo.length >= MaxNumOfComparisons){
+                setIsFlashDisplayed(true);
+                return;
+             }  else {
+                 newArr = [...currencySelections.convertTo, val]
+             }
+             newArr = GenUtils.alphabetizeStringArr(newArr);
+             setCurrencySelections({ ...currencySelections, convertTo: newArr})
+         }
+     },
         handleOptionClick_base: (optionVal, e)=> {
             // console.log(e.target.textContent);
             // if double-left click on an option, we want to use selection of this option to set a new convertFrom value (i.e. e.detail val is the consecutive num of left clicks)
@@ -179,7 +210,7 @@ function App() {
                     let leftArr = currencySelections.convertTo.slice(0, ix);
                     let rightArr = currencySelections.convertTo.slice(ix + 1);
                     newArr = [...leftArr, ...rightArr];
-                } else if (currencySelections.convertTo.length >= 7) {
+                } else if (currencySelections.convertTo.length >= MaxNumOfComparisons) {
                     setIsFlashDisplayed(true);
                 return; 
                 } else {
@@ -273,7 +304,7 @@ function App() {
         <header className="Header">
         <h1 className='Header-title'>Currency Visualization</h1>
             <div className={`Header-flashContainer ${isFlashDisplayed ? "isDisplayed" : ""}`}>
-                <p className={'Header-flashMessage'}>SELECT NO MORE THAN 7 COMPARISONS.<br/>TO DESELECT A SELECTED CHOICE, click it.</p>
+                <p className={'Header-flashMessage'}>SELECT NO MORE THAN {MaxNumOfComparisons} COMPARISONS.<br/>TO DESELECT A SELECTED CHOICE, click it.</p>
             </div>
         </header>
         <section className="Configure">
@@ -296,7 +327,7 @@ function App() {
                             id={'Configure-baseFilter'}
                             className={'Configure-baseFilter'}
                             value={baseFilterVal}
-                            onKeyUp={FilterHandling.handleBaseFilterToSelect}
+                            onKeyUp={FilterHandling.handleBaseFilterDownArrowToSelect}
                             onChange={(e)=>setBaseFilterVal(e.target.value)}
 
                         />
@@ -309,7 +340,7 @@ function App() {
                         className={"Configure-baseSelectBox"}
                         value={baseSelectValue}
                     
-                        onKeyUp={SelectHandling.baseSelectOnKey}
+                        onKeyUp={SelectHandling.baseSelectKeys}
                         onChange={e=>setBaseSelectValue(e.target.value)}
                  
                         
@@ -333,7 +364,7 @@ function App() {
             </div>
  
             <div className="Configure-Comparisons">
-                <h2 className='Configure-comparisonHeading'>Select &lt;= 7 currencies to compare</h2>
+                <h2 className='Configure-comparisonHeading'>Select &lt;= {MaxNumOfComparisons} currencies to compare</h2>
                 <form className='Configure-comparisonsForm'>
                     <label className='Configure-comparisonsFilterLabel'>
                         FILTER
@@ -345,13 +376,19 @@ function App() {
                             className={'Configure-comparisonsFilter'}
                             value={convertFilterVal}
                             onInput={(e)=>setConvertFilterVal(e.target.value)}
+                            onKeyUp={FilterHandling.handleConvertFilterDownArrowToSelect}
+                            onChange={(e)=>setConvertFilterVal(e.target.value)}
                         />
                     </label>
                    
                     <select  
+                        ref={Refs.convertSelect}
                         name='Convert'
                         size="4"
                         className={"Configure-comparisonsSelectBox"}
+                        value={convertSelectValue}
+                        onChange={e=>setConvertSelectValue(e.target.value)}
+                        onKeyUp={SelectHandling.convertSelectKeys}
                     >
                         {
                             Object.keys(currencyInfo.fullNames)
