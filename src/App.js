@@ -464,8 +464,14 @@ function App() {
         
         <main className="ChartContent">
             {
+                /* with respect to code in the below mapping, chartInfo assigns to an object on each iteration consiting of 2 key/values, chartInfo.currency and chartInfo.size.   
+                    already calculating size saves from what would otherwise be duplicated calculations in the below code */
+                /* the baseCurrency chart gets special styling including a label identifying it as 'base currency' */
+                /* getChartsOrientation will return either "width" or "height" depending on isSmallScreen value */
+                /* for small charts, opt for displaying label text outside of the chart by using bottom attribute (with absolute positioning) */
+                /* every modal is represented by an index, matching indices obtained via the current call to map, keeping track of indices with state variables allows independant control of each modal */
                 ChartsUtils.getChartsCurrenciesWithSize().map((chartInfo,ix)=>(
-                    
+       
                     <div className={`ChartContent-barChartContainer ${ix === 0 ? "is-baseChart" : ""}`} key={ix}>
                         <div style={{ [ChartsUtils.getChartsOrientation()]: String(chartInfo.size) + '%'}}
                             onClick={(e)=>ModalHandling.showModal(e,ix)}
@@ -482,8 +488,6 @@ function App() {
                             >
                                 <p>{currencyInfo.fullNames[chartInfo.currency]}</p>
                                 <p>1 {currencySelections.convertFrom}=={currencyInfo.rates[chartInfo.currency]} {chartInfo.currency}</p>
-
-
                             </div>
                         </div>
                     </div>
